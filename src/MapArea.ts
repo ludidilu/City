@@ -1,16 +1,34 @@
 class MapArea extends egret.DisplayObjectContainer{
 
-    public v:number;
+    public unitArr:MapUnit[];
 
-    public color:number;
+    public id:number;
 
-    private sp:egret.Shape = new egret.Shape();
+    private spContainer:egret.DisplayObjectContainer;
+
+    private tfContainer:egret.DisplayObjectContainer;
+
+    private sp:egret.Shape;
 
     private pointArr:number[][][] = [];
 
+    private tfArr:egret.TextField[] = [];
+
+    private static tfPool:egret.TextField[] = [];
+
     public init():void{
 
-        this.addChild(this.sp);
+        this.spContainer = new egret.DisplayObjectContainer();
+        
+        this.addChild(this.spContainer);
+
+        this.tfContainer = new egret.DisplayObjectContainer();
+
+        this.addChild(this.tfContainer);
+
+        this.sp = new egret.Shape();
+
+        this.spContainer.addChild(this.sp);
 
         for(let i:number = 0 ; i < 8 ; i++){
 
@@ -18,11 +36,64 @@ class MapArea extends egret.DisplayObjectContainer{
         }
     }
 
-    public setData(_v:number, _color:number):void{
+    public release():void{
 
-        this.v = _v;
+        for(let i:number = 0, m:number = this.tfArr.length ; i < m ; i++){
 
-        this.color = _color;
+            let tf:egret.TextField = this.tfArr[i];
+
+            this.tfContainer.removeChild(tf);
+
+            MapArea.tfPool.push(tf);
+        }
+
+        this.tfArr.length = 0;
+
+        this.sp.graphics.clear();
+    }
+
+    private static getTf(_container:egret.DisplayObjectContainer):egret.TextField{
+
+        let tf:egret.TextField;
+
+        if(this.tfPool.length > 0){
+
+            tf = this.tfPool.pop();
+        }
+        else{
+
+            tf = new egret.TextField();
+            
+            tf.width = Main.GUID_WIDTH;
+
+            tf.height = Main.GUID_HEIGHT;
+
+            tf.verticalAlign = egret.VerticalAlign.MIDDLE;
+
+            tf.textAlign = egret.HorizontalAlign.CENTER;
+
+            tf.bold = true;
+
+            tf.textColor = 0x000000;
+        }
+
+        _container.addChild(tf);
+
+        return tf;
+    }
+
+    public setData(_unitArr:MapUnit[], _id):void{
+
+        // console.log("------");
+
+        // for(let v of _unitArr){
+
+        //     console.log(v.pos);
+        // }
+
+        this.unitArr = _unitArr;
+
+        this.id = _id;
 
         for(let i:number = 0 ; i < 8 ; i++){
 
@@ -33,89 +104,98 @@ class MapArea extends egret.DisplayObjectContainer{
 
         let pointArr:number[][][] = this.pointArr;
 
-        command.clear();
-
-        command.beginFill(this.color);
+        command.beginFill(Main.MAP_COLOR[this.unitArr[0].color]);
 
         command.lineStyle(5);
 
-        for(let i:number = 0, m:number = Main.MAP_WIDTH * Main.MAP_HEIGHT; i < m ; i++){
+        for(let i:number = 0, m:number = this.unitArr.length; i < m ; i++){
 
-            let b:number = this.v & (1 << i);
-            
-            if(b){
+            let unit:MapUnit = this.unitArr[i];
 
-                let x:number = i % Main.MAP_WIDTH;
+            unit.area = this;
 
-                let y:number = Math.floor(i / Main.MAP_WIDTH);
+            let pos:number = unit.pos;
 
-                if(x == 0 || !(this.v & (1 << (i - 1)))){
+            let x:number = pos % Main.MAP_WIDTH;
 
-                    let sx:number = x * Main.GUID_WIDTH + Main.GUID_CUT_WIDTH;
+            let y:number = Math.floor(pos / Main.MAP_WIDTH);
 
-                    let sy:number = y * Main.GUID_HEIGHT + Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT;
+            let tf:egret.TextField = MapArea.getTf(this.tfContainer);
 
-                    command.moveTo(sx, sy);
+            this.tfArr.push(tf);
 
-                    pointArr[0].push([sx, sy]);
+            tf.x = x * Main.GUID_WIDTH;
 
-                    let tx:number = sx;
+            tf.y = y * Main.GUID_HEIGHT;
 
-                    let ty:number = sy + (Main.GUID_HEIGHT - (Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT) * 2);
+            tf.text = unit.score.toString();
 
-                    pointArr[1].push([tx, ty]);
-                }
+            if(x == 0 || !(this.id & (1 << (pos - 1)))){
 
-                if(x == Main.MAP_WIDTH - 1 || !(this.v & (1 << i + 1))){
+                let sx:number = x * Main.GUID_WIDTH + Main.GUID_CUT_WIDTH;
 
-                    let sx:number = x * Main.GUID_WIDTH + Main.GUID_CUT_WIDTH + (Main.GUID_WIDTH - Main.GUID_CUT_WIDTH * 2);
+                let sy:number = y * Main.GUID_HEIGHT + Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT;
 
-                    let sy:number = y * Main.GUID_HEIGHT + Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT;
+                command.moveTo(sx, sy);
 
-                    command.moveTo(sx, sy);
+                pointArr[0].push([sx, sy]);
 
-                    pointArr[2].push([sx, sy]);
+                let tx:number = sx;
 
-                    let tx:number = sx;
+                let ty:number = sy + (Main.GUID_HEIGHT - (Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT) * 2);
 
-                    let ty:number = sy + (Main.GUID_HEIGHT - (Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT) * 2);
+                pointArr[1].push([tx, ty]);
+            }
 
-                    pointArr[3].push([tx, ty]);
-                }
+            if(x == Main.MAP_WIDTH - 1 || !(this.id & (1 << pos + 1))){
 
-                if(y == 0 || (!(this.v & (1 << (i - Main.MAP_WIDTH))))){
+                let sx:number = x * Main.GUID_WIDTH + Main.GUID_CUT_WIDTH + (Main.GUID_WIDTH - Main.GUID_CUT_WIDTH * 2);
 
-                    let sx:number = x * Main.GUID_WIDTH + Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH;
+                let sy:number = y * Main.GUID_HEIGHT + Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT;
 
-                    let sy:number = y * Main.GUID_HEIGHT + Main.GUID_CUT_HEIGHT;
+                command.moveTo(sx, sy);
 
-                    command.moveTo(sx, sy);
+                pointArr[2].push([sx, sy]);
 
-                    pointArr[4].push([sx, sy]);
+                let tx:number = sx;
 
-                    let tx:number = sx + (Main.GUID_WIDTH - (Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH) * 2);
+                let ty:number = sy + (Main.GUID_HEIGHT - (Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT) * 2);
 
-                    let ty:number = sy;
+                pointArr[3].push([tx, ty]);
+            }
 
-                    pointArr[5].push([tx, ty]);
-                }
+            if(y == 0 || (!(this.id & (1 << (pos - Main.MAP_WIDTH))))){
 
-                if(y == Main.MAP_HEIGHT - 1 || !(this.v & (1 << (i + Main.MAP_WIDTH)))){
+                let sx:number = x * Main.GUID_WIDTH + Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH;
 
-                    let sx:number = x * Main.GUID_WIDTH + Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH;
+                let sy:number = y * Main.GUID_HEIGHT + Main.GUID_CUT_HEIGHT;
 
-                    let sy:number = y * Main.GUID_HEIGHT + Main.GUID_CUT_HEIGHT + (Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT * 2);
+                command.moveTo(sx, sy);
 
-                    command.moveTo(sx, sy);
+                pointArr[4].push([sx, sy]);
 
-                    pointArr[6].push([sx, sy]);
+                let tx:number = sx + (Main.GUID_WIDTH - (Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH) * 2);
 
-                    let tx:number = sx + (Main.GUID_WIDTH - (Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH) * 2);
+                let ty:number = sy;
 
-                    let ty:number = sy;
+                pointArr[5].push([tx, ty]);
+            }
 
-                    pointArr[7].push([tx, ty]);
-                }
+            if(y == Main.MAP_HEIGHT - 1 || !(this.id & (1 << (pos + Main.MAP_WIDTH)))){
+
+                let sx:number = x * Main.GUID_WIDTH + Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH;
+
+                let sy:number = y * Main.GUID_HEIGHT + Main.GUID_CUT_HEIGHT + (Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT * 2);
+
+                command.moveTo(sx, sy);
+
+                pointArr[6].push([sx, sy]);
+
+                let tx:number = sx + (Main.GUID_WIDTH - (Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH) * 2);
+
+                let ty:number = sy;
+
+                pointArr[7].push([tx, ty]);
             }
         }
 
@@ -132,7 +212,16 @@ class MapArea extends egret.DisplayObjectContainer{
         this.drawLine(sx, sy, 0, sx, sy, command, pointArr, true);
     }
 
+    // private ii:number = 0;
+
     private drawLine(_x:number, _y:number, _type:number, _startX:number, _startY:number, _graphics:egret.Graphics, _arr:number[][][], _first?:boolean):void{
+
+        // this.ii++;
+
+        // if(this.ii > 4){
+
+        //     return;
+        // }
 
         _graphics.lineTo(_x, _y);
 

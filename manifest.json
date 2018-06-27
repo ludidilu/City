@@ -11,6 +11,7 @@
 		"bin-debug/LoadingUI.js",
 		"bin-debug/Main.js",
 		"bin-debug/MapArea.js",
+		"bin-debug/MapUnit.js",
 		"bin-debug/Platform.js"
 	]
 }
