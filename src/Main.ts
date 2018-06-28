@@ -394,7 +394,7 @@ class Main extends egret.DisplayObjectContainer {
 
             area.release();
 
-            area.setData(area.unitArr, newKey);
+            area.setData(area.unitArr, newKey, false);
 
             tmpArr.push(area);
 
@@ -429,12 +429,7 @@ class Main extends egret.DisplayObjectContainer {
 
                 let id:number = Main.arrToNumber(arr);
 
-                area.setData(arr, id);
-
-                if(area.parent){
-
-                    console.log("error!!!");
-                }
+                area.setData(arr, id, false);
 
                 this.mapContainer.addChild(area);
 
@@ -621,20 +616,28 @@ class Main extends egret.DisplayObjectContainer {
             }
         }
 
+        let needSort:boolean = false;
+
         for(let key in areaDic){
 
             let tmpArr:MapUnit[] = areaDic[key];
 
             let area:MapArea = this.getMapArea();
 
-            area.setData(tmpArr, key);
+            if(area.setData(tmpArr, key, true) && !needSort){
+
+                needSort = true;
+            }
 
             this.areaDic[key] = area;
 
             this.mapContainer.addChild(area);
         }
 
-        this.sortArea();
+        if(needSort){
+
+            this.sortArea();
+        }
     }
 
     private sortArea():void{

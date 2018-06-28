@@ -119,23 +119,11 @@ class MapArea extends egret.DisplayObjectContainer{
         return sp;
     }
 
-    public setData(_unitArr:MapUnit[], _id):void{
-
-        // console.log("------");
-
-        // for(let v of _unitArr){
-
-        //     console.log(v.pos);
-        // }
+    public setData(_unitArr:MapUnit[], _id, _checkCircle:boolean):boolean{
 
         this.unitArr = _unitArr;
 
         this.id = _id;
-
-        // for(let i:number = 0 ; i < 8 ; i++){
-
-        //     this.pointArr[i].length = 0;
-        // }
 
         let command:egret.Graphics = this.sp.graphics;
 
@@ -234,9 +222,16 @@ class MapArea extends egret.DisplayObjectContainer{
 
         this.drawLine(sx, sy, 0, sx, sy, command, pointArr, true, true);
 
+        if(!_checkCircle){
+
+            return false;
+        }
+
+        let needSort:boolean = false;
+
         while(true){
 
-            let needDraw:boolean = false;
+            let drawMask:boolean = false;
 
             for(let i:number = 0 ; i < 8 ; i++){
 
@@ -244,7 +239,9 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 if(arr.length > 0){
 
-                    needDraw = true;
+                    drawMask = true;
+
+                    needSort = true;
 
                     let sp:egret.Shape = MapArea.getMaskSp(this.spContainer);
 
@@ -254,7 +251,11 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     sp.graphics.beginFill(0);
 
-                    this.drawLine(arr[0][0], arr[0][1], 0, arr[0][0], arr[0][1], sp.graphics, pointArr, false, true);
+                    sx = arr[0][0];
+
+                    sy = arr[0][1]; 
+
+                    this.drawLine(sx, sy, 0, sx, sy, sp.graphics, pointArr, false, true);
 
                     sp = MapArea.getMaskSp(this.spContainer);
 
@@ -264,15 +265,17 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     sp.graphics.beginFill(0, 0);
 
-                    this.drawLine(arr[0][0], arr[0][1], 0, arr[0][0], arr[0][1], sp.graphics, pointArr, true, true);
+                    this.drawLine(sx, sy, 0, sx, sy, sp.graphics, pointArr, true, true);
                 }
             }
 
-            if(!needDraw){
+            if(!drawMask){
 
                 break;
             }
         }
+
+        return needSort;
     }
 
     private drawLine(_x:number, _y:number, _type:number, _startX:number, _startY:number, _graphics:egret.Graphics, _arr:number[][][], _splice:boolean, _first?:boolean):void{
