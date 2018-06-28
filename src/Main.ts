@@ -55,9 +55,13 @@ class Main extends egret.DisplayObjectContainer {
 
     private areaPool:MapArea[] = [];
 
+    private gameContainer:egret.DisplayObjectContainer;
+
     private clickContainer:egret.DisplayObjectContainer;
 
     private mapContainer:egret.DisplayObjectContainer;
+
+    private test:Test;
 
     public constructor() {
 
@@ -70,24 +74,85 @@ class Main extends egret.DisplayObjectContainer {
         
         this.removeEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
 
+        egret.registerImplementation("eui.IAssetAdapter", new AssetAdapter());
+        egret.registerImplementation("eui.IThemeAdapter", new ThemeAdapter());
+
+        //初始化Resource资源加载库
+        // RES.addEventListener(RES.ResourceEvent.CONFIG_COMPLETE, this.onConfigComplete, this);
+        // RES.loadConfig("resource/default.res.json", "resource/");
+
+        this.loadResources();
+    }
+
+    private async loadResources():Promise<void>{
+
+        await RES.loadConfig("resource/default.res.json", "resource/");
+        await this.loadTheme();
+        await RES.loadGroup("preload");
+
+        this.init();
+    }
+
+    private loadTheme():Promise<{}> {
+        return new Promise((resolve, reject) => {
+            // load skin theme configuration file, you can manually modify the file. And replace the default skin.
+            //加载皮肤主题配置文件,可以手动修改这个文件。替换默认皮肤。
+            let theme = new eui.Theme("resource/default.thm.json", this.stage);
+            theme.addEventListener(eui.UIEvent.COMPLETE, () => {
+                resolve();
+            }, this);
+
+        })
+    }
+
+    private clickTest(e:egret.TouchEvent):void{
+
+        this.refreshMap();
+    }
+
+    private init():void{
+
         this.initContainer();
+
+        this.test = new Test();
+
+        this.addChild(this.test);
+
+        this.test.bt.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clickTest, this);
 
         this.initClick();
 
         this.start();
     }
 
+
     private initContainer():void{
+
+        this.gameContainer = new egret.DisplayObjectContainer();
+        
+        this.addChild(this.gameContainer);
 
         this.clickContainer = new egret.DisplayObjectContainer();
 
-        this.addChild(this.clickContainer);
+        this.gameContainer.addChild(this.clickContainer);
 
         this.mapContainer = new egret.DisplayObjectContainer();
 
         this.mapContainer.touchChildren = false;
 
-        this.addChild(this.mapContainer);
+        let mask:egret.Shape = new egret.Shape();
+
+        mask.graphics.beginFill(0);
+
+        mask.graphics.drawRect(0,0,Main.MAP_WIDTH * Main.GUID_WIDTH,Main.MAP_HEIGHT * Main.GUID_HEIGHT);
+
+        this.mapContainer.mask = mask;
+
+        this.gameContainer.addChild(mask);
+
+        this.gameContainer.addChild(this.mapContainer);
+
+        this.gameContainer.y = 300;
     }
 
     private initClick():void{
@@ -119,7 +184,7 @@ class Main extends egret.DisplayObjectContainer {
         }
     }
 
-    private click(_pos:number):void{
+    private async click(_pos:number){
 
         console.log("click:" + _pos);
 
@@ -129,25 +194,244 @@ class Main extends egret.DisplayObjectContainer {
 
         if(area.unitArr.length > 1){
 
-            for(let i:number = 0, m:number = area.unitArr.length ; i < m ; i++){
+            this.unitCombine(unit);
+
+            await this.unitFade(unit);
+
+            this.unitSplit();
+
+            this.refreshMap();
+
+            await this.unitFallAsync();
+
+            // return;
+
+            this.resetAreaPos();
+
+            this.resetUnitColor();
+
+            this.refreshMap();
+        }
+    }
+
+    private unitCombine(_unit:MapUnit):void{
+
+        let area:MapArea = _unit.area;
+
+        for(let i:number = 0, m:number = area.unitArr.length ; i < m ; i++){
 
                 let tmpUnit:MapUnit = area.unitArr[i];
 
-                if(tmpUnit != unit){
+                if(tmpUnit != _unit){
 
-                    unit.score += tmpUnit.score;
+                    _unit.score += tmpUnit.score;
 
                     this.unitPool.push(tmpUnit);
 
                     this.unitArr[tmpUnit.pos] = null;
                 }
             }
+    }
 
-            this.unitFall();
+    private async unitFade(_unit:MapUnit){
 
-            this.refill();
+        await _unit.area.fade(_unit);
+    }
 
-            this.refreshMap();
+    private unitSplit():void{
+
+        for(let i:number = Main.MAP_WIDTH * Main.MAP_HEIGHT - 1 ; i > -1  ; i--){
+
+            let unit:MapUnit = this.unitArr[i];
+
+            if(unit && unit.color < Main.MAP_COLOR.length && unit.pos < Main.MAP_WIDTH * (Main.MAP_HEIGHT - 1) && !this.unitArr[unit.pos + Main.MAP_WIDTH]){
+
+                unit.color += Main.MAP_COLOR.length * (unit.pos % Main.MAP_WIDTH);
+
+                let pos:number = unit.pos - Main.MAP_WIDTH;
+
+                while(pos > -1){
+
+                    let tmpUnit:MapUnit = this.unitArr[pos];
+
+                    if(tmpUnit && tmpUnit.color < Main.MAP_COLOR.length){
+
+                        tmpUnit.color += Main.MAP_COLOR.length * (tmpUnit.pos % Main.MAP_WIDTH);
+                    }
+
+                    pos -= Main.MAP_WIDTH;
+                }
+            }
+        }
+    }
+
+    private async unitFallAsync(){
+
+        let oldDic:{[key:number]:number} = {};
+
+        for(let i:number = Main.MAP_WIDTH * Main.MAP_HEIGHT - 1 ; i > -1  ; i--){
+
+            let unit:MapUnit = this.unitArr[i];
+
+            if(unit){
+
+                let addValue:boolean = false;
+
+                while(unit.pos < Main.MAP_WIDTH * (Main.MAP_HEIGHT - 1)){
+
+                    if(!this.unitArr[unit.pos + Main.MAP_WIDTH]){
+
+                        this.unitArr[unit.pos] = null;
+
+                        unit.pos += Main.MAP_WIDTH;
+
+                        this.unitArr[unit.pos] = unit;
+
+                        if(!oldDic[unit.area.id]){
+
+                            addValue = true;
+
+                            oldDic[unit.area.id] = -Main.GUID_HEIGHT;
+                        }
+                        else if(addValue){
+
+                            oldDic[unit.area.id] -= Main.GUID_HEIGHT;
+                        }
+                    }
+                    else{
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        let dic:{[key:number]:number} = {};
+
+        let arr:MapArea[] = []
+
+        for(let key in oldDic){
+
+            let area:MapArea = this.areaDic[key];
+
+            let newKey:number = Main.arrToNumber(area.unitArr);
+
+            delete this.areaDic[key];
+
+            area.release();
+
+            area.setData(area.unitArr, newKey);
+
+            arr.push(area);
+
+            dic[newKey] = oldDic[key];
+
+            area.y = oldDic[key];
+        }
+
+        for(let i:number = 0, m:number = arr.length ; i < m ; i++){
+
+            let area:MapArea = arr[i];
+
+            if(this.areaDic[area.id]){
+
+                console.log("error!!!!!!!!!!!!!!!!");
+            }
+
+            this.areaDic[area.id] = area;
+        }
+
+        this.refill(true);
+
+        // let dic2:{[key:number]:number} = {};
+
+        for(let i:number = 0 ; i < Main.MAP_WIDTH * Main.MAP_HEIGHT; i++){
+
+            let unit:MapUnit = this.unitArr[i];
+
+            if(unit && !unit.area){
+
+                let arr:MapUnit[] = [unit];
+
+                let area:MapArea = this.getMapArea();
+
+                let id:number = Main.arrToNumber(arr);
+
+                area.setData(arr, id);
+
+                this.mapContainer.addChild(area);
+
+                if(this.areaDic[id]){
+
+                    console.log("error!!!!!!!!!!!!!!!!");
+                }
+
+                this.areaDic[id] = area;
+
+                let pos:number = unit.pos + Main.MAP_WIDTH;
+
+                let num = -Main.GUID_HEIGHT * (1 + Math.floor(unit.pos / Main.MAP_WIDTH));
+
+                while(pos < Main.MAP_WIDTH * Main.MAP_HEIGHT){
+
+                    let tmpUnit:MapUnit = this.unitArr[pos];
+
+                    if(!tmpUnit.area){
+
+                        num -= Main.GUID_HEIGHT;
+                    }
+
+                    pos += Main.MAP_WIDTH;
+                }
+
+                // dic2[id] = num;
+
+                dic[id] = num;
+
+                area.y = num;
+            }
+        }
+
+        let fun:(_v:number)=>void = function(_v:number):void{
+
+            for(let key in dic){
+
+                let area:MapArea = this.areaDic[key];
+
+                area.y = _v * dic[key];
+            }
+
+            // for(let key in dic2){
+
+            //     let area:MapArea = this.areaDic[key];
+
+            //     area.y = _v * dic2[key];
+            // }
+        };
+
+        await SuperTween.getInstance().to(1,0,1000,fun.bind(this));
+    }
+
+    private resetAreaPos():void{
+
+        for(let key in this.areaDic){
+
+            let area:MapArea = this.areaDic[key];
+
+            area.x = area.y = 0;
+        }
+    }
+
+    private resetUnitColor():void{
+
+        for(let i:number = 0 ; i < Main.MAP_WIDTH * Main.MAP_HEIGHT ; i++){
+
+            let unit:MapUnit = this.unitArr[i];
+
+            if(unit.color >= Main.MAP_COLOR.length){
+
+                unit.color = unit.color % Main.MAP_COLOR.length;
+            }
         }
     }
 
@@ -178,7 +462,7 @@ class Main extends egret.DisplayObjectContainer {
         }
     }
 
-    private refill():void{
+    private refill(_fixColor:boolean):void{
 
         for(let i:number = Main.MAP_WIDTH * Main.MAP_HEIGHT - 1 ; i > -1  ; i--){
 
@@ -188,9 +472,18 @@ class Main extends egret.DisplayObjectContainer {
 
                 unit.pos = i;
 
-                unit.color = Math.floor(Math.random() * Main.MAP_COLOR.length);
+                if(_fixColor){
+
+                    unit.color = Math.floor(Math.random() * Main.MAP_COLOR.length) + Main.MAP_COLOR.length * (i % Main.MAP_WIDTH);
+                }
+                else{
+
+                    unit.color = Math.floor(Math.random() * Main.MAP_COLOR.length);
+                }
 
                 unit.score = 1;
+
+                unit.area = null;
 
                 this.unitArr[i] = unit;
             }
@@ -199,7 +492,7 @@ class Main extends egret.DisplayObjectContainer {
 
     private start():void{
 
-        this.refill();
+        this.refill(false);
 
         this.refreshMap();
     }

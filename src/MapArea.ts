@@ -104,7 +104,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
         let pointArr:number[][][] = this.pointArr;
 
-        command.beginFill(Main.MAP_COLOR[this.unitArr[0].color]);
+        command.beginFill(Main.MAP_COLOR[this.unitArr[0].color % Main.MAP_COLOR.length]);
 
         command.lineStyle(5);
 
@@ -212,16 +212,7 @@ class MapArea extends egret.DisplayObjectContainer{
         this.drawLine(sx, sy, 0, sx, sy, command, pointArr, true);
     }
 
-    // private ii:number = 0;
-
     private drawLine(_x:number, _y:number, _type:number, _startX:number, _startY:number, _graphics:egret.Graphics, _arr:number[][][], _first?:boolean):void{
-
-        // this.ii++;
-
-        // if(this.ii > 4){
-
-        //     return;
-        // }
 
         _graphics.lineTo(_x, _y);
 
@@ -711,5 +702,44 @@ class MapArea extends egret.DisplayObjectContainer{
         }
 
         return false;
+    }
+
+    public async fade(_unit:MapUnit){
+
+        let x:number = _unit.pos % Main.MAP_WIDTH;
+
+        let y:number = Math.floor(_unit.pos / Main.MAP_WIDTH);
+
+        this.anchorOffsetX = (x + 0.5) * Main.GUID_WIDTH;
+
+        this.anchorOffsetY = (y + 0.5) * Main.GUID_HEIGHT;
+
+        this.x = this.anchorOffsetX;
+
+        this.y = this.anchorOffsetY;
+
+        // let scaleX:number = Main.GUID_WIDTH / this.width;
+
+        // let scaleY:number = Main.GUID_HEIGHT / this.height;
+
+        // let fun:(_v:number)=>void = function(_v:number):void{
+
+        //     this.scaleX = 1 + (scaleX - 1) * _v;
+
+        //     this.scaleY = 1 + (scaleY - 1) * _v;
+        // };
+
+        await SuperTween.getInstance().to(1, 0, 500, this.scaleChange.bind(this));
+
+        this.anchorOffsetX = this.anchorOffsetY = this.x = this.y = 0;
+
+        this.scaleX = 1;
+
+        this.scaleY = 1;
+    }
+
+    private scaleChange(_v:number):void{
+
+        this.scaleX = this.scaleY = _v;
     }
 }
