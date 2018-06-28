@@ -107,7 +107,44 @@ class Main extends egret.DisplayObjectContainer {
 
     private clickTest(e:egret.TouchEvent):void{
 
-        this.testReal();
+        // this.testReal();
+
+        // let arr:{data:{pos:number, color:number}[]} = {};
+
+        let arr:{pos:number, color:number}[] = [];
+
+        for(let unit of this.unitArr){
+
+            let obj = {pos:unit.pos, color:unit.color};
+
+            arr.push(obj);
+        }
+
+        let bbb = {data:arr};
+
+        console.log("str:" + JSON.stringify(bbb));
+    }
+
+    private clickTest1(e:egret.TouchEvent):void{
+
+        let arr:{data:{pos:number, color:number}[]} = RES.getRes("aaa_json");
+
+        this.reset();
+
+        for(let data of arr.data){
+
+            let unit:MapUnit = this.getMapUnit();
+
+            unit.pos = data.pos;
+
+            unit.color = data.color;
+
+            unit.score = 1;
+
+            this.unitArr[unit.pos] = unit;
+        }
+
+        this.refreshMap();
     }
 
     private async testReal(){
@@ -143,6 +180,8 @@ class Main extends egret.DisplayObjectContainer {
         this.addChild(this.test);
 
         this.test.bt.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clickTest, this);
+
+        this.test.bt1.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clickTest1, this);
 
         this.initClick();
 
@@ -214,8 +253,6 @@ class Main extends egret.DisplayObjectContainer {
 
         this.clickContainer.touchChildren = false;
 
-        console.log("click:" + _pos);
-
         let unit:MapUnit = this.unitArr[_pos];
 
         let area:MapArea = unit.area;
@@ -240,7 +277,7 @@ class Main extends egret.DisplayObjectContainer {
         }
         else{
 
-            this.destroyUnit(unit);
+            this.unitDestroy(unit);
 
             this.unitSplit();
 
@@ -258,7 +295,7 @@ class Main extends egret.DisplayObjectContainer {
         this.clickContainer.touchChildren = true;
     }
 
-    private destroyUnit(_unit:MapUnit):void{
+    private unitDestroy(_unit:MapUnit):void{
 
         this.unitPool.push(_unit);
 
@@ -303,7 +340,7 @@ class Main extends egret.DisplayObjectContainer {
 
             if(unit && unit.color < Main.MAP_COLOR.length && unit.pos < Main.MAP_WIDTH * (Main.MAP_HEIGHT - 1) && !this.unitArr[unit.pos + Main.MAP_WIDTH]){
 
-                unit.color += Main.MAP_COLOR.length * (unit.pos % Main.MAP_WIDTH);
+                unit.color += Main.MAP_COLOR.length * ((unit.pos % Main.MAP_WIDTH) + 1);
 
                 let pos:number = unit.pos - Main.MAP_WIDTH;
 
@@ -313,7 +350,7 @@ class Main extends egret.DisplayObjectContainer {
 
                     if(tmpUnit && tmpUnit.color < Main.MAP_COLOR.length){
 
-                        tmpUnit.color += Main.MAP_COLOR.length * (tmpUnit.pos % Main.MAP_WIDTH);
+                        tmpUnit.color += Main.MAP_COLOR.length * ((tmpUnit.pos % Main.MAP_WIDTH) + 1);
                     }
 
                     pos -= Main.MAP_WIDTH;
@@ -413,6 +450,11 @@ class Main extends egret.DisplayObjectContainer {
                 let id:number = Main.arrToNumber(arr);
 
                 area.setData(arr, id);
+
+                if(area.parent){
+
+                    console.log("error!!!");
+                }
 
                 this.mapContainer.addChild(area);
 
@@ -704,6 +746,34 @@ class Main extends egret.DisplayObjectContainer {
 
             return unit;
         }
+    }
+
+    private reset():void{
+
+        for(let i:number = 0 ; i < Main.MAP_WIDTH * Main.MAP_HEIGHT ; i++){
+
+            let unit:MapUnit = this.unitArr[i];
+
+            if(unit){
+
+                this.unitPool.push(unit);
+
+                this.unitArr[i] = null;
+            }
+        }
+
+        for(let key in this.areaDic){
+
+            let area:MapArea = this.areaDic[key];
+
+            area.release();
+
+            this.mapContainer.removeChild(area);
+
+            this.areaPool.push(area);
+        }
+
+        this.areaDic = {};
     }
 
     public static arrToNumber(_arr:MapUnit[]):number{

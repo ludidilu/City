@@ -17,4 +17,6 @@ class Test extends eui.Component implements  eui.UIComponent {
 	}
 	
 	public bt:eui.Button;
+
+	public bt1:eui.Button;
 }
