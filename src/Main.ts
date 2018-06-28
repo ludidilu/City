@@ -137,9 +137,9 @@ class Main extends egret.DisplayObjectContainer {
 
                     unit.score += tmpUnit.score;
 
-                    this.unitPool.push(unit);
+                    this.unitPool.push(tmpUnit);
 
-                    this.unitArr[unit.pos] = null;
+                    this.unitArr[tmpUnit.pos] = null;
                 }
             }
 
@@ -163,7 +163,11 @@ class Main extends egret.DisplayObjectContainer {
 
                     if(!this.unitArr[unit.pos + Main.MAP_WIDTH]){
 
+                        this.unitArr[unit.pos] = null;
+
                         unit.pos += Main.MAP_WIDTH;
+
+                        this.unitArr[unit.pos] = unit;
                     }
                     else{
 
@@ -212,13 +216,16 @@ class Main extends egret.DisplayObjectContainer {
 
                 let unit:MapUnit = this.unitArr[i];
 
-                let tmpArr:MapUnit[] = [unit];
+                if(unit){
 
-                arr.push(tmpArr);
+                    let tmpArr:MapUnit[] = [unit];
 
-                dic[i] = true;
+                    arr.push(tmpArr);
 
-                this.checkNeighbour(tmpArr, dic, unit);
+                    dic[i] = true;
+
+                    this.checkNeighbour(tmpArr, dic, unit);
+                }
             }
         }
 
@@ -244,6 +251,8 @@ class Main extends egret.DisplayObjectContainer {
                 this.mapContainer.removeChild(area);
 
                 this.areaPool.push(area);
+
+                delete this.areaDic[key];
             }
             else{
 
@@ -275,7 +284,7 @@ class Main extends egret.DisplayObjectContainer {
 
             let tmpUnit:MapUnit = this.unitArr[_unit.pos - 1];
 
-            if(tmpUnit.color == _unit.color && !_dic[tmpUnit.pos]){
+            if(tmpUnit && tmpUnit.color == _unit.color && !_dic[tmpUnit.pos]){
 
                 _dic[tmpUnit.pos] = true;
 
@@ -289,7 +298,7 @@ class Main extends egret.DisplayObjectContainer {
 
             let tmpUnit:MapUnit = this.unitArr[_unit.pos + 1];
 
-            if(tmpUnit.color == _unit.color && !_dic[tmpUnit.pos]){
+            if(tmpUnit && tmpUnit.color == _unit.color && !_dic[tmpUnit.pos]){
 
                 _dic[tmpUnit.pos] = true;
 
@@ -303,7 +312,7 @@ class Main extends egret.DisplayObjectContainer {
 
             let tmpUnit:MapUnit = this.unitArr[_unit.pos - Main.MAP_WIDTH];
 
-            if(tmpUnit.color == _unit.color && !_dic[tmpUnit.pos]){
+            if(tmpUnit && tmpUnit.color == _unit.color && !_dic[tmpUnit.pos]){
 
                 _dic[tmpUnit.pos] = true;
 
@@ -317,7 +326,7 @@ class Main extends egret.DisplayObjectContainer {
 
             let tmpUnit:MapUnit = this.unitArr[_unit.pos + Main.MAP_WIDTH];
 
-            if(tmpUnit.color == _unit.color && !_dic[tmpUnit.pos]){
+            if(tmpUnit && tmpUnit.color == _unit.color && !_dic[tmpUnit.pos]){
 
                 _dic[tmpUnit.pos] = true;
 
