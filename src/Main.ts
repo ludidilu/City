@@ -149,26 +149,6 @@ class Main extends egret.DisplayObjectContainer {
 
     private async testReal(){
 
-        let area:MapArea;
-
-        for(let key in this.areaDic){
-
-            area = this.areaDic[key];
-
-            break;
-        }
-
-        area.release();
-
-        // this.mapContainer.removeChild(area);
-
-        // await SuperTween.getInstance().to(0,0,1000,null);
-
-        area.setData(area.unitArr, area.id);
-
-        // this.mapContainer.addChild(area);
-
-        area.y = -240;
     }
 
     private init():void{
@@ -652,6 +632,41 @@ class Main extends egret.DisplayObjectContainer {
             this.areaDic[key] = area;
 
             this.mapContainer.addChild(area);
+        }
+
+        this.sortArea();
+    }
+
+    private sortArea():void{
+
+        let arr:MapArea[] = [];
+
+        for(let key in this.areaDic){
+
+            arr.push(this.areaDic[key]);
+        }
+
+        arr = arr.sort(this.compareArea);
+
+        for(let area of arr){
+
+            this.mapContainer.setChildIndex(area, 0);
+        }
+    }
+
+    private compareArea(_a:MapArea, _b:MapArea):number{
+
+        if(_a.unitArr.length > _b.unitArr.length){
+
+            return 1;
+        }
+        else if(_a.unitArr.length < _b.unitArr.length){
+
+            return -1;
+        }
+        else{
+
+            return 0;
         }
     }
 
