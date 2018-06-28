@@ -107,18 +107,42 @@ class Main extends egret.DisplayObjectContainer {
 
     private clickTest(e:egret.TouchEvent):void{
 
-        this.refreshMap();
+        this.testReal();
+    }
+
+    private async testReal(){
+
+        let area:MapArea;
+
+        for(let key in this.areaDic){
+
+            area = this.areaDic[key];
+
+            break;
+        }
+
+        area.release();
+
+        // this.mapContainer.removeChild(area);
+
+        // await SuperTween.getInstance().to(0,0,1000,null);
+
+        area.setData(area.unitArr, area.id);
+
+        // this.mapContainer.addChild(area);
+
+        area.y = -240;
     }
 
     private init():void{
 
         this.initContainer();
 
-        // this.test = new Test();
+        this.test = new Test();
 
-        // this.addChild(this.test);
+        this.addChild(this.test);
 
-        // this.test.bt.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clickTest, this);
+        this.test.bt.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clickTest, this);
 
         this.initClick();
 
@@ -140,15 +164,15 @@ class Main extends egret.DisplayObjectContainer {
 
         this.mapContainer.touchChildren = false;
 
-        // let mask:egret.Shape = new egret.Shape();
+        let mask:egret.Shape = new egret.Shape();
 
-        // mask.graphics.beginFill(0);
+        mask.graphics.beginFill(0);
 
-        // mask.graphics.drawRect(0,0,Main.MAP_WIDTH * Main.GUID_WIDTH,Main.MAP_HEIGHT * Main.GUID_HEIGHT);
+        mask.graphics.drawRect(0,0,Main.MAP_WIDTH * Main.GUID_WIDTH,Main.MAP_HEIGHT * Main.GUID_HEIGHT);
 
-        // this.mapContainer.mask = mask;
+        this.mapContainer.mask = mask;
 
-        // this.gameContainer.addChild(mask);
+        this.gameContainer.addChild(mask);
 
         this.gameContainer.addChild(this.mapContainer);
 
@@ -188,6 +212,8 @@ class Main extends egret.DisplayObjectContainer {
 
     private async click(_pos:number){
 
+        this.clickContainer.touchChildren = false;
+
         console.log("click:" + _pos);
 
         let unit:MapUnit = this.unitArr[_pos];
@@ -212,6 +238,37 @@ class Main extends egret.DisplayObjectContainer {
 
             this.refreshMap();
         }
+        else{
+
+            this.destroyUnit(unit);
+
+            this.unitSplit();
+
+            this.refreshMap();
+
+            await this.unitFallAsync();
+
+            this.resetAreaPos();
+
+            this.resetUnitColor();
+
+            this.refreshMap();
+        }
+
+        this.clickContainer.touchChildren = true;
+    }
+
+    private destroyUnit(_unit:MapUnit):void{
+
+        this.unitPool.push(_unit);
+
+        this.unitArr[_unit.pos] = null;
+
+        _unit.area.release();
+
+        this.mapContainer.removeChild(_unit.area);
+
+        delete this.areaDic[_unit.area.id];
     }
 
     private unitCombine(_unit:MapUnit):void{
@@ -220,17 +277,17 @@ class Main extends egret.DisplayObjectContainer {
 
         for(let i:number = 0, m:number = area.unitArr.length ; i < m ; i++){
 
-                let tmpUnit:MapUnit = area.unitArr[i];
+            let tmpUnit:MapUnit = area.unitArr[i];
 
-                if(tmpUnit != _unit){
+            if(tmpUnit != _unit){
 
-                    _unit.score += tmpUnit.score;
+                _unit.score += tmpUnit.score;
 
-                    this.unitPool.push(tmpUnit);
+                this.unitPool.push(tmpUnit);
 
-                    this.unitArr[tmpUnit.pos] = null;
-                }
+                this.unitArr[tmpUnit.pos] = null;
             }
+        }
     }
 
     private async unitFade(_unit:MapUnit){
@@ -308,7 +365,7 @@ class Main extends egret.DisplayObjectContainer {
 
         let dic:{[key:number]:number} = {};
 
-        let arr:MapArea[] = []
+        let tmpArr:MapArea[] = []
 
         for(let key in oldDic){
 
@@ -322,16 +379,16 @@ class Main extends egret.DisplayObjectContainer {
 
             area.setData(area.unitArr, newKey);
 
-            arr.push(area);
+            tmpArr.push(area);
 
             dic[newKey] = oldDic[key];
 
             area.y = oldDic[key];
         }
 
-        for(let i:number = 0, m:number = arr.length ; i < m ; i++){
+        for(let i:number = 0, m:number = tmpArr.length ; i < m ; i++){
 
-            let area:MapArea = arr[i];
+            let area:MapArea = tmpArr[i];
 
             if(this.areaDic[area.id]){
 

@@ -55,15 +55,21 @@ class SuperTween{
 
                 this.list.splice(this.list.indexOf(unit), 1);
 
-                unit.cb(unit.end);
+                if(unit.cb){
+
+                    unit.cb(unit.end);
+                }
 
                 unit.endCb();
             }
             else{
 
-                let v:number = unit.start + (unit.end - unit.start) * (unit.time - unit.timeLong) / unit.time;
+                if(unit.cb){
 
-                unit.cb(v);
+                    let v:number = unit.start + (unit.end - unit.start) * (unit.time - unit.timeLong) / unit.time;
+
+                    unit.cb(v);
+                }
             }
         }
     }
