@@ -114,11 +114,11 @@ class Main extends egret.DisplayObjectContainer {
 
         this.initContainer();
 
-        this.test = new Test();
+        // this.test = new Test();
 
-        this.addChild(this.test);
+        // this.addChild(this.test);
 
-        this.test.bt.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clickTest, this);
+        // this.test.bt.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clickTest, this);
 
         this.initClick();
 
@@ -140,19 +140,21 @@ class Main extends egret.DisplayObjectContainer {
 
         this.mapContainer.touchChildren = false;
 
-        let mask:egret.Shape = new egret.Shape();
+        // let mask:egret.Shape = new egret.Shape();
 
-        mask.graphics.beginFill(0);
+        // mask.graphics.beginFill(0);
 
-        mask.graphics.drawRect(0,0,Main.MAP_WIDTH * Main.GUID_WIDTH,Main.MAP_HEIGHT * Main.GUID_HEIGHT);
+        // mask.graphics.drawRect(0,0,Main.MAP_WIDTH * Main.GUID_WIDTH,Main.MAP_HEIGHT * Main.GUID_HEIGHT);
 
-        this.mapContainer.mask = mask;
+        // this.mapContainer.mask = mask;
 
-        this.gameContainer.addChild(mask);
+        // this.gameContainer.addChild(mask);
 
         this.gameContainer.addChild(this.mapContainer);
 
         this.gameContainer.y = 300;
+
+        this.gameContainer.x = 20;
     }
 
     private initClick():void{
@@ -203,8 +205,6 @@ class Main extends egret.DisplayObjectContainer {
             this.refreshMap();
 
             await this.unitFallAsync();
-
-            // return;
 
             this.resetAreaPos();
 
@@ -343,8 +343,6 @@ class Main extends egret.DisplayObjectContainer {
 
         this.refill(true);
 
-        // let dic2:{[key:number]:number} = {};
-
         for(let i:number = 0 ; i < Main.MAP_WIDTH * Main.MAP_HEIGHT; i++){
 
             let unit:MapUnit = this.unitArr[i];
@@ -384,8 +382,6 @@ class Main extends egret.DisplayObjectContainer {
                     pos += Main.MAP_WIDTH;
                 }
 
-                // dic2[id] = num;
-
                 dic[id] = num;
 
                 area.y = num;
@@ -400,13 +396,6 @@ class Main extends egret.DisplayObjectContainer {
 
                 area.y = _v * dic[key];
             }
-
-            // for(let key in dic2){
-
-            //     let area:MapArea = this.areaDic[key];
-
-            //     area.y = _v * dic2[key];
-            // }
         };
 
         await SuperTween.getInstance().to(1,0,1000,fun.bind(this));
