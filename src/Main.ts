@@ -183,15 +183,9 @@ class Main extends egret.DisplayObjectContainer {
 
         this.mapContainer.touchChildren = false;
 
-        let mask:egret.Shape = new egret.Shape();
-
-        mask.graphics.beginFill(0);
-
-        mask.graphics.drawRect(0,0,Main.MAP_WIDTH * Main.GUID_WIDTH,Main.MAP_HEIGHT * Main.GUID_HEIGHT);
+        let mask:egret.Rectangle = new egret.Rectangle(0,0,Main.MAP_WIDTH * Main.GUID_WIDTH,Main.MAP_HEIGHT * Main.GUID_HEIGHT);
 
         this.mapContainer.mask = mask;
-
-        this.gameContainer.addChild(mask);
 
         this.gameContainer.addChild(this.mapContainer);
 
