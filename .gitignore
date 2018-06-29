@@ -71,3 +71,4 @@ Assets/Plugins/*
 /bin-release
 /.wing
 /libs
+manifest.json
