@@ -136,6 +136,8 @@ class Main extends egret.DisplayObjectContainer {
 
     private init():void{
 
+        this.initBg();
+
         this.initContainer();
 
         this.initClick();
@@ -145,6 +147,16 @@ class Main extends egret.DisplayObjectContainer {
         this.start();
     }
 
+    private initBg():void{
+
+        let sp:egret.Shape = new egret.Shape();
+
+        sp.graphics.beginFill(0x888888);
+
+        sp.graphics.drawRect(0, 0, this.stage.stageWidth, this.stage.stageHeight);
+
+        this.addChild(sp);
+    }
 
     private initContainer():void{
 
