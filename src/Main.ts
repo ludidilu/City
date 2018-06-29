@@ -531,7 +531,7 @@ class Main extends egret.DisplayObjectContainer {
 
                 if(_fixColor){
 
-                    unit.color = Math.floor(Math.random() * Main.MAP_COLOR.length) + Main.MAP_COLOR.length * (i % Main.MAP_WIDTH);
+                    unit.color = Math.floor(Math.random() * Main.MAP_COLOR.length) + Main.MAP_COLOR.length * ((i % Main.MAP_WIDTH) + 1);
                 }
                 else{
 
