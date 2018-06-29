@@ -272,15 +272,19 @@ class Main extends egret.DisplayObjectContainer {
 
     private async checkIsOver(){
 
-        if(this.unitDestroyTimes == 0){
+        if(this.isOver()){
 
-            if(this.isOver()){
+            if(this.unitDestroyTimes == 0){
 
                 await this.alertPanel.showOne("You lose!");
 
                 this.reset();
 
                 this.start();
+            }
+            else{
+
+                await this.alertPanel.showOne("You have to destroy one!");
             }
         }
     }

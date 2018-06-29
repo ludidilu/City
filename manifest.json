@@ -8,13 +8,13 @@
 		"libs/modules/promise/promise.js"
 	],
 	"game": [
-		"bin-debug/AssetAdapter.js",
 		"bin-debug/LoadingUI.js",
+		"bin-debug/SuperTicker.js",
 		"bin-debug/Main.js",
 		"bin-debug/MapArea.js",
 		"bin-debug/MapUnit.js",
 		"bin-debug/Platform.js",
-		"bin-debug/SuperTicker.js",
+		"bin-debug/AssetAdapter.js",
 		"bin-debug/SuperTween.js",
 		"bin-debug/ThemeAdapter.js",
 		"bin-debug/skin/AlertPanel.js",
