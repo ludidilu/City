@@ -1,11 +1,15 @@
 {
 	"skins": {
 		"eui.Button": "resource/eui_skins/ButtonSkin.exml",
-		"Test": "resource/eui_skins/Test.exml"
+		"Test": "resource/eui_skins/Test.exml",
+		"AlertPanel": "resource/eui_skins/AlertPanel.exml",
+		"MainPanel": "resource/eui_skins/MainPanel.exml"
 	},
 	"autoGenerateExmlsList": true,
 	"exmls": [
+		"resource/eui_skins/AlertPanel.exml",
 		"resource/eui_skins/ButtonSkin.exml",
+		"resource/eui_skins/MainPanel.exml",
 		"resource/eui_skins/Test.exml"
 	],
 	"path": "resource/default.thm.json"

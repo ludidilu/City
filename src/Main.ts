@@ -18,6 +18,8 @@ class Main extends egret.DisplayObjectContainer {
 
     public static readonly MAP_COLOR:number[] = [0xff0000, 0x00ff00, 0x5555ff, 0xffffff];
 
+    public static readonly DEFAULT_DESTROY_TIMES:number = 2;
+
     private unitArr:MapUnit[] = [];
 
     private unitPool:MapUnit[] = [];
@@ -31,6 +33,16 @@ class Main extends egret.DisplayObjectContainer {
     private clickContainer:egret.DisplayObjectContainer;
 
     private mapContainer:egret.DisplayObjectContainer;
+
+    private uiContainer:egret.DisplayObjectContainer;
+
+    private unitDestroyTimes:number;
+
+    private sameColorProbability:number = 0;
+
+    private mainPanel:MainPanel;
+
+    private alertPanel:AlertPanel;
 
     private test:Test;
 
@@ -78,22 +90,7 @@ class Main extends egret.DisplayObjectContainer {
 
     private clickTest(e:egret.TouchEvent):void{
 
-        // this.testReal();
-
-        // let arr:{data:{pos:number, color:number}[]} = {};
-
-        let arr:{pos:number, color:number}[] = [];
-
-        for(let unit of this.unitArr){
-
-            let obj = {pos:unit.pos, color:unit.color};
-
-            arr.push(obj);
-        }
-
-        let bbb = {data:arr};
-
-        console.log("str:" + JSON.stringify(bbb));
+        console.log("over:" + this.isOver());
     }
 
     private clickTest1(e:egret.TouchEvent):void{
@@ -126,15 +123,9 @@ class Main extends egret.DisplayObjectContainer {
 
         this.initContainer();
 
-        this.test = new Test();
-
-        this.addChild(this.test);
-
-        this.test.bt.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clickTest, this);
-
-        this.test.bt1.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clickTest1, this);
-
         this.initClick();
+
+        this.initUi();
 
         this.start();
     }
@@ -160,9 +151,13 @@ class Main extends egret.DisplayObjectContainer {
 
         this.gameContainer.addChild(this.mapContainer);
 
-        this.gameContainer.y = 300;
+        this.gameContainer.y = 50;
 
         this.gameContainer.x = 20;
+
+        this.uiContainer = new egret.DisplayObjectContainer();
+
+        this.addChild(this.uiContainer);
     }
 
     private initClick():void{
@@ -219,25 +214,79 @@ class Main extends egret.DisplayObjectContainer {
             this.resetUnitColor();
 
             this.refreshMap();
+
+            await this.checkIsOver();
         }
         else{
 
-            this.unitDestroy(unit);
+            if(this.unitDestroyTimes > 0){
 
-            this.unitSplit();
+                let b:boolean = await this.alertPanel.showTwo("Destroy?");
 
-            this.refreshMap();
+                if(b){
 
-            await this.unitFallAsync();
+                    this.unitDestroyTimes--;
 
-            this.resetAreaPos();
+                    this.mainPanel.times.text = this.unitDestroyTimes.toString();
 
-            this.resetUnitColor();
+                    this.unitDestroy(unit);
 
-            this.refreshMap();
+                    this.unitSplit();
+
+                    this.refreshMap();
+
+                    await this.unitFallAsync();
+
+                    this.resetAreaPos();
+
+                    this.resetUnitColor();
+
+                    this.refreshMap();
+
+                    await this.checkIsOver();
+                }
+            }
+            else{
+
+                await this.alertPanel.showOne("Can not destroy!");
+            }
         }
 
         this.clickContainer.touchChildren = true;
+    }
+
+    private async checkIsOver(){
+
+        if(this.unitDestroyTimes == 0){
+
+            if(this.isOver()){
+
+                await this.alertPanel.showOne("You lose!");
+
+                this.reset();
+
+                this.start();
+            }
+        }
+    }
+
+    private initUi():void{
+
+        this.mainPanel = new MainPanel();
+
+        this.uiContainer.addChild(this.mainPanel);
+
+        this.alertPanel = new AlertPanel();
+
+        this.uiContainer.addChild(this.alertPanel);
+
+        this.test = new Test();
+
+        this.uiContainer.addChild(this.test);
+
+        this.test.bt.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clickTest, this);
+
+        this.test.bt1.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clickTest1, this);
     }
 
     private unitDestroy(_unit:MapUnit):void{
@@ -380,7 +429,7 @@ class Main extends egret.DisplayObjectContainer {
             this.areaDic[area.id] = area;
         }
 
-        this.refill(true);
+        this.refill(true, this.sameColorProbability);
 
         for(let i:number = 0 ; i < Main.MAP_WIDTH * Main.MAP_HEIGHT; i++){
 
@@ -490,7 +539,7 @@ class Main extends egret.DisplayObjectContainer {
         }
     }
 
-    private refill(_fixColor:boolean):void{
+    private refill(_fixColor:boolean, _same:number):void{
 
         for(let i:number = Main.MAP_WIDTH * Main.MAP_HEIGHT - 1 ; i > -1  ; i--){
 
@@ -500,13 +549,87 @@ class Main extends egret.DisplayObjectContainer {
 
                 unit.pos = i;
 
-                if(_fixColor){
+                let color:number;
 
-                    unit.color = Math.floor(Math.random() * Main.MAP_COLOR.length) + Main.MAP_COLOR.length * ((i % Main.MAP_WIDTH) + 1);
+                if(Math.random() < _same){
+
+                    let arr:number[] = [];
+
+                    let x:number = i % Main.MAP_WIDTH;
+
+                    let y:number = Math.floor(i / Main.MAP_WIDTH);
+
+                    if(x > 0){
+
+                        let pos = i - 1;
+
+                        let tmpUnit:MapUnit = this.unitArr[pos];
+
+                        if(tmpUnit){
+
+                            arr.push(tmpUnit.color % Main.MAP_COLOR.length);
+                        }
+                    }
+
+                    if(x < Main.MAP_WIDTH - 1){
+
+                        let pos = i + 1;
+
+                        let tmpUnit:MapUnit = this.unitArr[pos];
+
+                        if(tmpUnit){
+
+                            arr.push(tmpUnit.color % Main.MAP_COLOR.length);
+                        }
+                    }
+
+                    if(y > 0){
+
+                        let pos = i - Main.MAP_WIDTH;
+
+                        let tmpUnit:MapUnit = this.unitArr[pos];
+
+                        if(tmpUnit){
+
+                            arr.push(tmpUnit.color % Main.MAP_COLOR.length);
+                        }
+                    }
+
+                    if(y < Main.MAP_HEIGHT - 1){
+
+                        let pos = i + Main.MAP_WIDTH;
+
+                        let tmpUnit:MapUnit = this.unitArr[pos];
+
+                        if(tmpUnit){
+
+                            arr.push(tmpUnit.color % Main.MAP_COLOR.length);
+                        }
+                    }
+
+                    if(arr.length > 0){
+
+                        let index:number = Math.floor(Math.random() * arr.length);
+
+                        color = arr[index];
+                    }
+                    else{
+
+                        color = Math.floor(Math.random() * Main.MAP_COLOR.length);
+                    }
                 }
                 else{
 
-                    unit.color = Math.floor(Math.random() * Main.MAP_COLOR.length);
+                    color = Math.floor(Math.random() * Main.MAP_COLOR.length);
+                }
+
+                if(_fixColor){
+
+                    unit.color = color + Main.MAP_COLOR.length * ((i % Main.MAP_WIDTH) + 1);
+                }
+                else{
+
+                    unit.color = color;
                 }
 
                 unit.score = 1;
@@ -520,7 +643,11 @@ class Main extends egret.DisplayObjectContainer {
 
     private start():void{
 
-        this.refill(false);
+        this.unitDestroyTimes = Main.DEFAULT_DESTROY_TIMES;
+
+        this.mainPanel.times.text = this.unitDestroyTimes.toString();
+
+        this.refill(false, this.sameColorProbability);
 
         this.refreshMap();
     }
@@ -759,6 +886,21 @@ class Main extends egret.DisplayObjectContainer {
         }
 
         this.areaDic = {};
+    }
+
+    private isOver():boolean{
+
+        for(let key in this.areaDic){
+
+            let area:MapArea = this.areaDic[key];
+
+            if(area.unitArr.length > 1){
+
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static arrToNumber(_arr:MapUnit[]):number{

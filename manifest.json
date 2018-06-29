@@ -17,6 +17,8 @@
 		"bin-debug/SuperTicker.js",
 		"bin-debug/SuperTween.js",
 		"bin-debug/ThemeAdapter.js",
+		"bin-debug/skin/AlertPanel.js",
+		"bin-debug/skin/MainPanel.js",
 		"bin-debug/skin/Test.js"
 	]
 }

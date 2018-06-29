@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="AlertPanelSkin" width="640" height="1136" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
+	<w:Config id="164497bc3f2" ></w:Config>
+	<e:Rect left="0" right="0" top="0" bottom="0" fillAlpha="0.3"/>
+	<e:Group width="500" height="400" horizontalCenter="0" verticalCenter="0" touchEnabled="false">
+		<e:Rect width="500" height="400" horizontalCenter="0" verticalCenter="0" fillColor="0xc68d37" x="0" y="0" scaleX="1" scaleY="1" touchEnabled="false"/>
+		<e:Label id="msg" text="Label" y="28" width="400" horizontalCenter="0" verticalAlign="middle" textAlign="center" anchorOffsetY="0" height="250" textColor="0x000000" size="40" x="50" scaleX="1" scaleY="1" touchEnabled="false"/>
+		<e:Group id="oneBt" scaleX="1" scaleY="1" left="0" right="0" top="0" bottom="0" touchEnabled="false">
+			<e:Button id="btOne" label="OK" y="320" scaleX="1" scaleY="1" horizontalCenter="0"/>
+		</e:Group>
+		<e:Group id="twoBt" scaleX="1" scaleY="1" top="0" bottom="0" touchEnabled="false" left="0" right="0">
+			<e:Button id="btYes" label="Yes" y="320" scaleX="1" scaleY="1" x="100"/>
+			<e:Button id="btNo" label="No" y="320" scaleX="1" scaleY="1" x="300"/>
+		</e:Group>
+	</e:Group>
+</e:Skin>

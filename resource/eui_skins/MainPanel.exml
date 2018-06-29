@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="MainPanelSkin" width="640" height="1136" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
+	<w:Config id="16449abcb06" ></w:Config>
+	<e:Label text="Times:" width="100" height="50" verticalAlign="middle" textAlign="center" x="100" top="0" touchEnabled="false"/>
+	<e:Label text="Score:" width="100" height="50" verticalAlign="middle" textAlign="center" x="320" top="0" touchEnabled="false"/>
+	<e:Label id="score" text="1234456" width="200" height="50" verticalAlign="middle" textAlign="left" x="420" top="0" touchEnabled="false"/>
+	<e:Label id="times" text="12" width="100" height="50" verticalAlign="middle" textAlign="left" x="200" top="0" touchEnabled="false"/>
+</e:Skin>
