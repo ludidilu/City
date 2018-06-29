@@ -32,6 +32,8 @@ class AlertPanel extends eui.Component implements  eui.UIComponent {
 		this.width = this.stage.stageWidth;
 
 		this.height = this.stage.stageHeight;
+
+		this.touchEnabled = false;
 	}
 
 	protected partAdded(partName:string,instance:any):void
