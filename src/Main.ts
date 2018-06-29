@@ -92,7 +92,24 @@ class Main extends egret.DisplayObjectContainer {
 
     private clickTest(e:egret.TouchEvent):void{
 
-        console.log("over:" + this.isOver());
+        let kk:{[key:number]:number} = {};
+
+        kk[5] = 0;
+
+        if(kk[5] === undefined){
+
+            console.log("aa");
+        }
+
+        if(kk[4] === undefined){
+
+            console.log("bb");
+        }
+
+        if(kk[5] == undefined){
+
+            console.log("cc");
+        }
     }
 
     private clickTest1(e:egret.TouchEvent):void{
@@ -115,10 +132,6 @@ class Main extends egret.DisplayObjectContainer {
         }
 
         this.refreshMap();
-    }
-
-    private async testReal(){
-
     }
 
     private init():void{
@@ -325,7 +338,9 @@ class Main extends egret.DisplayObjectContainer {
 
     private async unitFade(_unit:MapUnit){
 
-        await _unit.area.fade(_unit);
+        // await _unit.area.fade(_unit);
+
+        await _unit.area.fade2(_unit);
     }
 
     private unitSplit():void{
