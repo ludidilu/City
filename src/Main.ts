@@ -38,6 +38,8 @@ class Main extends egret.DisplayObjectContainer {
 
     private unitDestroyTimes:number;
 
+    private score:number;
+
     private sameColorProbability:number = 0;
 
     private mainPanel:MainPanel;
@@ -429,7 +431,7 @@ class Main extends egret.DisplayObjectContainer {
             this.areaDic[area.id] = area;
         }
 
-        this.refill(true, this.sameColorProbability);
+        this.refill(true, this.sameColorProbability, true);
 
         for(let i:number = 0 ; i < Main.MAP_WIDTH * Main.MAP_HEIGHT; i++){
 
@@ -539,7 +541,7 @@ class Main extends egret.DisplayObjectContainer {
         }
     }
 
-    private refill(_fixColor:boolean, _same:number):void{
+    private refill(_fixColor:boolean, _sameProbability:number, _addScore:boolean):void{
 
         for(let i:number = Main.MAP_WIDTH * Main.MAP_HEIGHT - 1 ; i > -1  ; i--){
 
@@ -551,7 +553,7 @@ class Main extends egret.DisplayObjectContainer {
 
                 let color:number;
 
-                if(Math.random() < _same){
+                if(Math.random() < _sameProbability){
 
                     let arr:number[] = [];
 
@@ -634,6 +636,13 @@ class Main extends egret.DisplayObjectContainer {
 
                 unit.score = 1;
 
+                if(_addScore){
+
+                    this.score += unit.score;
+
+                    this.mainPanel.score.text = this.score.toString();
+                }
+
                 unit.area = null;
 
                 this.unitArr[i] = unit;
@@ -645,9 +654,13 @@ class Main extends egret.DisplayObjectContainer {
 
         this.unitDestroyTimes = Main.DEFAULT_DESTROY_TIMES;
 
+        this.score = 0;
+
         this.mainPanel.times.text = this.unitDestroyTimes.toString();
 
-        this.refill(false, this.sameColorProbability);
+        this.mainPanel.score.text = this.score.toString();
+
+        this.refill(false, this.sameColorProbability, false);
 
         this.refreshMap();
     }

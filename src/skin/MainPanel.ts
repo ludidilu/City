@@ -9,6 +9,17 @@ class MainPanel extends eui.Component implements  eui.UIComponent {
 		super();
 
 		this.skinName = "resource/eui_skins/MainPanel.exml";
+		
+		this.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
+	}
+
+	private onAddToStage(event: egret.Event):void{
+
+		this.removeEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
+
+		this.width = this.stage.stageWidth;
+
+		this.height = this.stage.stageHeight;
 	}
 
 	protected partAdded(partName:string,instance:any):void

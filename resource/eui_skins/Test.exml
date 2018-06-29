@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <e:Skin class="TestSkin" width="640" height="1136" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
 	<w:Config id="16444de8118" ></w:Config>
-	<e:Button id="bt" label="Button" x="0" y="800"/>
-	<e:Button id="bt1" label="Button" x="132" y="800"/>
+	<e:Button id="bt" label="Button" left="0" bottom="0"/>
+	<e:Button id="bt1" label="Button" x="132" bottom="0"/>
 </e:Skin>
