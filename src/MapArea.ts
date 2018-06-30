@@ -48,7 +48,7 @@ class MapGridUnit extends egret.DisplayObjectContainer{
 
     private initSp():void{
 
-        for(let i:number = 0, m:number = Main.MAP_COLOR.length ; i < m ; i++){
+        for(let i:number = 0, m:number = Main.MAP_COLOR.length - 1 ; i < m ; i++){
 
             let sp:egret.Shape = new egret.Shape();
 
@@ -101,11 +101,33 @@ class MapGridUnit extends egret.DisplayObjectContainer{
         this.addChild(this.tf);
     }
 
-    public setScore(_score:number):void{
+    public setScore(_score:number, _canOverMaxLevel:boolean):void{
 
         this.score = _score;
 
-        this.tf.text = this.score.toString();
+        let level:number = this.getLevel(_canOverMaxLevel);
+
+        this.tf.text = level.toString();
+    }
+
+    public getLevel(_canOverMaxLevel:boolean):number{
+
+        for(let i:number = 0, m:number = Main.LEVEL_ARR.length ; i < m ; i++){
+
+            if(this.score < Main.LEVEL_ARR[i]){
+
+                return i;
+            }
+        }
+
+        if(!_canOverMaxLevel){
+
+            return Main.LEVEL_ARR.length;
+        }
+        else{
+
+            return Main.LEVEL_ARR.length + this.score / Main.LEVEL_ARR[Main.LEVEL_ARR.length - 1] - 1;
+        }
     }
 
     public showSp(_index:number):void{
@@ -115,7 +137,7 @@ class MapGridUnit extends egret.DisplayObjectContainer{
 
     public reset():void{
 
-        for(let i:number = 0, m:number = Main.MAP_COLOR.length ; i < m ; i++){
+        for(let i:number = 0, m:number = Main.MAP_COLOR.length - 1 ; i < m ; i++){
 
             this.spArr[i].visible = false;
         }
@@ -298,7 +320,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
             grid.y = y * Main.GUID_HEIGHT;
 
-            grid.setScore(unit.score);
+            grid.setScore(unit.score, true);
 
             if(x == 0 || !(this.id & (1 << (pos - 1)))){
 
@@ -1016,6 +1038,8 @@ class MapArea extends egret.DisplayObjectContainer{
 
         self.gridContainer.setChildIndex(baseGrid, -1);
 
+        let canOverMaxLevel:boolean = _unit.color > Main.MAP_COLOR.length - 2;
+
         let cb:(_v:number)=>void = function(_v:number):void{
 
             for(let i:number = arr.length - 1 ; i > -1 ; i--){
@@ -1036,7 +1060,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                         arr.splice(i, 1);
 
-                        baseGrid.setScore(baseGrid.score + guid.score);
+                        baseGrid.setScore(baseGrid.score + guid.score, canOverMaxLevel);
 
                         self.releaseGrid(guid);
 
@@ -1063,7 +1087,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                             arr.splice(i, 1);
 
-                            baseGrid.setScore(baseGrid.score + guid.score);
+                            baseGrid.setScore(baseGrid.score + guid.score, canOverMaxLevel);
 
                             self.releaseGrid(guid);
                         }

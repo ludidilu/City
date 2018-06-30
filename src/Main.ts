@@ -16,9 +16,13 @@ class Main extends egret.DisplayObjectContainer {
 
     public static readonly MAP_HEIGHT:number = 5;
 
-    public static readonly MAP_COLOR:number[] = [0xff0000, 0x00ff00, 0x5555ff, 0xffffff];
+    public static readonly MAP_COLOR:number[] = [0xff0000, 0x00ff00, 0x5555ff, 0xff00ff, 0xffffff, 0xffff00];
 
     public static readonly DEFAULT_DESTROY_TIMES:number = 2;
+
+    public static readonly LEVEL_ARR:number[] = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89];
+
+    // public static readonly LEVEL_ARR:number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
     private unitArr:MapUnit[] = [];
 
@@ -337,6 +341,8 @@ class Main extends egret.DisplayObjectContainer {
 
         let area:MapArea = _unit.area;
 
+        let isFinal:boolean = _unit.score == Main.LEVEL_ARR[Main.LEVEL_ARR.length - 1];
+
         for(let i:number = 0, m:number = area.unitArr.length ; i < m ; i++){
 
             let tmpUnit:MapUnit = area.unitArr[i];
@@ -348,6 +354,20 @@ class Main extends egret.DisplayObjectContainer {
                 this.unitPool.push(tmpUnit);
 
                 this.unitArr[tmpUnit.pos] = null;
+            }
+        }
+
+        if(isFinal){
+
+            _unit.color = Main.MAP_COLOR.length - 1 + Main.MAP_COLOR.length * _unit.pos;
+        }
+        else{
+
+            if(_unit.score >= Main.LEVEL_ARR[Main.LEVEL_ARR.length - 1]){
+
+                _unit.score = Main.LEVEL_ARR[Main.LEVEL_ARR.length - 1];
+
+                _unit.color = Main.MAP_COLOR.length - 2;
             }
         }
     }
@@ -365,7 +385,7 @@ class Main extends egret.DisplayObjectContainer {
 
             let unit:MapUnit = this.unitArr[i];
 
-            if(unit && unit.color < Main.MAP_COLOR.length && unit.pos < Main.MAP_WIDTH * (Main.MAP_HEIGHT - 1) && !this.unitArr[unit.pos + Main.MAP_WIDTH]){
+            if(unit && unit.color < Main.MAP_COLOR.length - 1 && unit.pos < Main.MAP_WIDTH * (Main.MAP_HEIGHT - 1) && !this.unitArr[unit.pos + Main.MAP_WIDTH]){
 
                 unit.color += Main.MAP_COLOR.length * ((unit.pos % Main.MAP_WIDTH) + 1);
 
@@ -375,7 +395,7 @@ class Main extends egret.DisplayObjectContainer {
 
                     let tmpUnit:MapUnit = this.unitArr[pos];
 
-                    if(tmpUnit && tmpUnit.color < Main.MAP_COLOR.length){
+                    if(tmpUnit && tmpUnit.color < Main.MAP_COLOR.length - 1){
 
                         tmpUnit.color += Main.MAP_COLOR.length * ((tmpUnit.pos % Main.MAP_WIDTH) + 1);
                     }
@@ -538,9 +558,11 @@ class Main extends egret.DisplayObjectContainer {
 
             let unit:MapUnit = this.unitArr[i];
 
-            if(unit.color >= Main.MAP_COLOR.length){
+            let tmpColor:number = unit.color % Main.MAP_COLOR.length;
 
-                unit.color = unit.color % Main.MAP_COLOR.length;
+            if(tmpColor < Main.MAP_COLOR.length - 1){
+
+                unit.color = tmpColor;
             }
         }
     }
@@ -600,7 +622,12 @@ class Main extends egret.DisplayObjectContainer {
 
                         if(tmpUnit){
 
-                            arr.push(tmpUnit.color % Main.MAP_COLOR.length);
+                            let tmpColor:number = tmpUnit.color % Main.MAP_COLOR.length;
+
+                            if(tmpColor < Main.MAP_COLOR.length - 2){
+
+                                arr.push(tmpColor);
+                            }
                         }
                     }
 
@@ -612,7 +639,12 @@ class Main extends egret.DisplayObjectContainer {
 
                         if(tmpUnit){
 
-                            arr.push(tmpUnit.color % Main.MAP_COLOR.length);
+                            let tmpColor:number = tmpUnit.color % Main.MAP_COLOR.length;
+
+                            if(tmpColor < Main.MAP_COLOR.length - 2){
+
+                                arr.push(tmpColor);
+                            }
                         }
                     }
 
@@ -624,7 +656,12 @@ class Main extends egret.DisplayObjectContainer {
 
                         if(tmpUnit){
 
-                            arr.push(tmpUnit.color % Main.MAP_COLOR.length);
+                            let tmpColor:number = tmpUnit.color % Main.MAP_COLOR.length;
+
+                            if(tmpColor < Main.MAP_COLOR.length - 2){
+
+                                arr.push(tmpColor);
+                            }
                         }
                     }
 
@@ -636,7 +673,12 @@ class Main extends egret.DisplayObjectContainer {
 
                         if(tmpUnit){
 
-                            arr.push(tmpUnit.color % Main.MAP_COLOR.length);
+                            let tmpColor:number = tmpUnit.color % Main.MAP_COLOR.length;
+
+                            if(tmpColor < Main.MAP_COLOR.length - 2){
+
+                                arr.push(tmpColor);
+                            }
                         }
                     }
 
@@ -648,12 +690,12 @@ class Main extends egret.DisplayObjectContainer {
                     }
                     else{
 
-                        color = Math.floor(Math.random() * Main.MAP_COLOR.length);
+                        color = Math.floor(Math.random() * (Main.MAP_COLOR.length - 2));
                     }
                 }
                 else{
 
-                    color = Math.floor(Math.random() * Main.MAP_COLOR.length);
+                    color = Math.floor(Math.random() * (Main.MAP_COLOR.length - 2));
                 }
 
                 if(_fixColor){
