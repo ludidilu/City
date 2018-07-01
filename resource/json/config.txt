@@ -1,0 +1,29 @@
+{
+    "GUID_WIDTH": 120,单元格宽度
+
+    "GUID_HEIGHT": 120,单元格高度
+
+    "GUID_CUT_WIDTH": 10,地表宽度修正
+
+    "GUID_CUT_HEIGHT": 10,地表高度修正
+
+    "GUID_CURVE_WIDTH": 10,地表圆弧宽度
+
+    "GUID_CURVE_HEIGHT": 10,地表圆弧高度
+
+    "MAP_WIDTH": 5,单元格列数
+
+    "MAP_HEIGHT": 5,单元格行数
+
+    "MAP_COLOR": ["0xff0000", "0x00ff00", "0x5555ff", "0xff00ff", "0xffffff", "0xffff00"],地表颜色数组，最后一个是10级以上的颜色，倒数第二个是10级的颜色
+
+    "DEFAULT_DESTROY_TIMES": 2,初始锤子数量
+
+    "COMBINE_ADD_DESTROY_TIMES": 100,合并多少次奖励一个锤子
+
+    "LEVEL_ADD_DESTROY_TIMES": 15,合并出多少级的建筑奖励一个锤子
+
+    "LEVEL_ARR": [1, 2, 3, 5, 8, 13, 21, 34, 55, 89],地表升级数组
+
+    "LEVEL_SCORE_ARR": [1, 5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920],地表分数数组
+}

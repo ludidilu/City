@@ -1,28 +1,6 @@
 class Main extends egret.DisplayObjectContainer {
 
-    public static readonly GUID_WIDTH:number = 120;
-
-    public static readonly GUID_HEIGHT:number = 120;
-
-    public static readonly GUID_CUT_WIDTH:number = 10;
-
-    public static readonly GUID_CUT_HEIGHT:number = 10;
-
-    public static readonly GUID_CURVE_WIDTH:number = 10;
-
-    public static readonly GUID_CURVE_HEIGHT:number = 10;
-
-    public static readonly MAP_WIDTH:number = 5;
-
-    public static readonly MAP_HEIGHT:number = 5;
-
-    public static readonly MAP_COLOR:number[] = [0xff0000, 0x00ff00, 0x5555ff, 0xff00ff, 0xffffff, 0xffff00];
-
-    public static readonly DEFAULT_DESTROY_TIMES:number = 2;
-
-    public static readonly LEVEL_ARR:number[] = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89];
-
-    // public static readonly LEVEL_ARR:number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    public static config:Config;
 
     private unitArr:MapUnit[] = [];
 
@@ -42,7 +20,7 @@ class Main extends egret.DisplayObjectContainer {
 
     private unitDestroyTimes:number;
 
-    private score:number;
+    private year:number;
 
     private sameColorProbability:number = 0;
 
@@ -78,11 +56,19 @@ class Main extends egret.DisplayObjectContainer {
         await RES.loadConfig("resource/default.res.json", "resource/");
         await this.loadTheme();
         await RES.loadGroup("preload");
+        await this.loadConfig();
 
         this.init();
+
+        this.start();
     }
 
-    private loadTheme():Promise<{}> {
+    private async loadConfig(){
+
+        Main.config = await RES.getResAsync("config_json");
+    }
+
+    private async loadTheme(){
         return new Promise((resolve, reject) => {
             // load skin theme configuration file, you can manually modify the file. And replace the default skin.
             //加载皮肤主题配置文件,可以手动修改这个文件。替换默认皮肤。
@@ -147,8 +133,6 @@ class Main extends egret.DisplayObjectContainer {
         this.initClick();
 
         this.initUi();
-
-        this.start();
     }
 
     private initBg():void{
@@ -176,7 +160,7 @@ class Main extends egret.DisplayObjectContainer {
 
         this.mapContainer.touchChildren = false;
 
-        let mask:egret.Rectangle = new egret.Rectangle(0,0,Main.MAP_WIDTH * Main.GUID_WIDTH,Main.MAP_HEIGHT * Main.GUID_HEIGHT);
+        let mask:egret.Rectangle = new egret.Rectangle(0,0,Main.config.MAP_WIDTH * Main.config.GUID_WIDTH,Main.config.MAP_HEIGHT * Main.config.GUID_HEIGHT);
 
         this.mapContainer.mask = mask;
 
@@ -193,13 +177,13 @@ class Main extends egret.DisplayObjectContainer {
 
     private initClick():void{
 
-        for(let i:number = 0 ; i < Main.MAP_WIDTH * Main.MAP_HEIGHT ; i++){
+        for(let i:number = 0 ; i < Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT ; i++){
 
             let pos:number = i;
 
-            let x:number = pos % Main.MAP_WIDTH;
+            let x:number = pos % Main.config.MAP_WIDTH;
 
-            let y:number = Math.floor(pos / Main.MAP_WIDTH);
+            let y:number = Math.floor(pos / Main.config.MAP_WIDTH);
 
             let sp:egret.Sprite = new egret.Sprite();
 
@@ -207,7 +191,7 @@ class Main extends egret.DisplayObjectContainer {
 
             sp.graphics.beginFill(0xff0000, 0);
 
-            sp.graphics.drawRect(x * Main.GUID_WIDTH, y * Main.GUID_HEIGHT, Main.GUID_WIDTH, Main.GUID_HEIGHT);
+            sp.graphics.drawRect(x * Main.config.GUID_WIDTH, y * Main.config.GUID_HEIGHT, Main.config.GUID_WIDTH, Main.config.GUID_HEIGHT);
 
             let fun:(e:egret.TouchEvent)=>void = function(e:egret.TouchEvent):void{
 
@@ -246,6 +230,8 @@ class Main extends egret.DisplayObjectContainer {
 
             this.refreshMap();
 
+            this.refreshScore();
+
             await this.checkIsOver();
         }
         else{
@@ -256,9 +242,7 @@ class Main extends egret.DisplayObjectContainer {
 
                 if(b){
 
-                    this.unitDestroyTimes--;
-
-                    this.mainPanel.times.text = this.unitDestroyTimes.toString();
+                    this.setUnitDestroyTimes(this.unitDestroyTimes - 1);
 
                     this.unitDestroy(unit);
 
@@ -273,6 +257,8 @@ class Main extends egret.DisplayObjectContainer {
                     this.resetUnitColor();
 
                     this.refreshMap();
+
+                    this.refreshScore();
 
                     await this.checkIsOver();
                 }
@@ -302,6 +288,28 @@ class Main extends egret.DisplayObjectContainer {
 
                 await this.alertPanel.showOne("You have to destroy one!");
             }
+        }
+    }
+
+    private refreshScore():void{
+
+        let score:number = 0;
+
+        for(let i:number = 0, m:number = Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT; i < m ; i++){
+
+            let unit:MapUnit = this.unitArr[i];
+
+            if(unit){
+
+                let level:number = MapArea.getLevel(unit.score, true);
+                
+                if(level < Main.config.LEVEL_SCORE_ARR.length){
+
+                    score += Main.config.LEVEL_SCORE_ARR[level - 1];
+                }
+            }
+
+            this.mainPanel.score.text = score.toString();
         }
     }
 
@@ -341,7 +349,7 @@ class Main extends egret.DisplayObjectContainer {
 
         let area:MapArea = _unit.area;
 
-        let isFinal:boolean = _unit.score == Main.LEVEL_ARR[Main.LEVEL_ARR.length - 1];
+        let isFinal:boolean = _unit.score == Main.config.LEVEL_ARR[Main.config.LEVEL_ARR.length - 1];
 
         for(let i:number = 0, m:number = area.unitArr.length ; i < m ; i++){
 
@@ -359,16 +367,30 @@ class Main extends egret.DisplayObjectContainer {
 
         if(isFinal){
 
-            _unit.color = Main.MAP_COLOR.length - 1 + Main.MAP_COLOR.length * _unit.pos;
+            _unit.color = Main.config.MAP_COLOR.length - 1 + Main.config.MAP_COLOR.length * _unit.pos;
+
+            let level:number = MapArea.getLevel(_unit.score, true);
+
+            if(level >= Main.config.LEVEL_ADD_DESTROY_TIMES){
+
+                this.setUnitDestroyTimes(this.unitDestroyTimes + 1);
+            }
         }
         else{
 
-            if(_unit.score >= Main.LEVEL_ARR[Main.LEVEL_ARR.length - 1]){
+            if(_unit.score >= Main.config.LEVEL_ARR[Main.config.LEVEL_ARR.length - 1]){
 
-                _unit.score = Main.LEVEL_ARR[Main.LEVEL_ARR.length - 1];
+                _unit.score = Main.config.LEVEL_ARR[Main.config.LEVEL_ARR.length - 1];
 
-                _unit.color = Main.MAP_COLOR.length - 2;
+                _unit.color = Main.config.MAP_COLOR.length - 2;
             }
+        }
+
+        this.setYear(this.year + 1);
+
+        if(this.year % Main.config.COMBINE_ADD_DESTROY_TIMES == 0){
+
+            this.setUnitDestroyTimes(this.unitDestroyTimes + 1);
         }
     }
 
@@ -381,26 +403,26 @@ class Main extends egret.DisplayObjectContainer {
 
     private unitSplit():void{
 
-        for(let i:number = Main.MAP_WIDTH * Main.MAP_HEIGHT - 1 ; i > -1  ; i--){
+        for(let i:number = Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT - 1 ; i > -1  ; i--){
 
             let unit:MapUnit = this.unitArr[i];
 
-            if(unit && unit.color < Main.MAP_COLOR.length - 1 && unit.pos < Main.MAP_WIDTH * (Main.MAP_HEIGHT - 1) && !this.unitArr[unit.pos + Main.MAP_WIDTH]){
+            if(unit && unit.color < Main.config.MAP_COLOR.length - 1 && unit.pos < Main.config.MAP_WIDTH * (Main.config.MAP_HEIGHT - 1) && !this.unitArr[unit.pos + Main.config.MAP_WIDTH]){
 
-                unit.color += Main.MAP_COLOR.length * ((unit.pos % Main.MAP_WIDTH) + 1);
+                unit.color += Main.config.MAP_COLOR.length * ((unit.pos % Main.config.MAP_WIDTH) + 1);
 
-                let pos:number = unit.pos - Main.MAP_WIDTH;
+                let pos:number = unit.pos - Main.config.MAP_WIDTH;
 
                 while(pos > -1){
 
                     let tmpUnit:MapUnit = this.unitArr[pos];
 
-                    if(tmpUnit && tmpUnit.color < Main.MAP_COLOR.length - 1){
+                    if(tmpUnit && tmpUnit.color < Main.config.MAP_COLOR.length - 1){
 
-                        tmpUnit.color += Main.MAP_COLOR.length * ((tmpUnit.pos % Main.MAP_WIDTH) + 1);
+                        tmpUnit.color += Main.config.MAP_COLOR.length * ((tmpUnit.pos % Main.config.MAP_WIDTH) + 1);
                     }
 
-                    pos -= Main.MAP_WIDTH;
+                    pos -= Main.config.MAP_WIDTH;
                 }
             }
         }
@@ -410,7 +432,7 @@ class Main extends egret.DisplayObjectContainer {
 
         let oldDic:{[key:number]:number} = {};
 
-        for(let i:number = Main.MAP_WIDTH * Main.MAP_HEIGHT - 1 ; i > -1  ; i--){
+        for(let i:number = Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT - 1 ; i > -1  ; i--){
 
             let unit:MapUnit = this.unitArr[i];
 
@@ -418,13 +440,13 @@ class Main extends egret.DisplayObjectContainer {
 
                 let addValue:boolean = false;
 
-                while(unit.pos < Main.MAP_WIDTH * (Main.MAP_HEIGHT - 1)){
+                while(unit.pos < Main.config.MAP_WIDTH * (Main.config.MAP_HEIGHT - 1)){
 
-                    if(!this.unitArr[unit.pos + Main.MAP_WIDTH]){
+                    if(!this.unitArr[unit.pos + Main.config.MAP_WIDTH]){
 
                         this.unitArr[unit.pos] = null;
 
-                        unit.pos += Main.MAP_WIDTH;
+                        unit.pos += Main.config.MAP_WIDTH;
 
                         this.unitArr[unit.pos] = unit;
 
@@ -432,11 +454,11 @@ class Main extends egret.DisplayObjectContainer {
 
                             addValue = true;
 
-                            oldDic[unit.area.id] = -Main.GUID_HEIGHT;
+                            oldDic[unit.area.id] = -Main.config.GUID_HEIGHT;
                         }
                         else if(addValue){
 
-                            oldDic[unit.area.id] -= Main.GUID_HEIGHT;
+                            oldDic[unit.area.id] -= Main.config.GUID_HEIGHT;
                         }
                     }
                     else{
@@ -482,9 +504,9 @@ class Main extends egret.DisplayObjectContainer {
             this.areaDic[area.id] = area;
         }
 
-        this.refill(true, this.sameColorProbability, true);
+        this.refill(true, this.sameColorProbability);
 
-        for(let i:number = 0 ; i < Main.MAP_WIDTH * Main.MAP_HEIGHT; i++){
+        for(let i:number = 0 ; i < Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT; i++){
 
             let unit:MapUnit = this.unitArr[i];
 
@@ -507,20 +529,20 @@ class Main extends egret.DisplayObjectContainer {
 
                 this.areaDic[id] = area;
 
-                let pos:number = unit.pos + Main.MAP_WIDTH;
+                let pos:number = unit.pos + Main.config.MAP_WIDTH;
 
-                let num = -Main.GUID_HEIGHT * (1 + Math.floor(unit.pos / Main.MAP_WIDTH));
+                let num = -Main.config.GUID_HEIGHT * (1 + Math.floor(unit.pos / Main.config.MAP_WIDTH));
 
-                while(pos < Main.MAP_WIDTH * Main.MAP_HEIGHT){
+                while(pos < Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT){
 
                     let tmpUnit:MapUnit = this.unitArr[pos];
 
                     if(!tmpUnit.area){
 
-                        num -= Main.GUID_HEIGHT;
+                        num -= Main.config.GUID_HEIGHT;
                     }
 
-                    pos += Main.MAP_WIDTH;
+                    pos += Main.config.MAP_WIDTH;
                 }
 
                 dic[id] = num;
@@ -554,13 +576,13 @@ class Main extends egret.DisplayObjectContainer {
 
     private resetUnitColor():void{
 
-        for(let i:number = 0 ; i < Main.MAP_WIDTH * Main.MAP_HEIGHT ; i++){
+        for(let i:number = 0 ; i < Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT ; i++){
 
             let unit:MapUnit = this.unitArr[i];
 
-            let tmpColor:number = unit.color % Main.MAP_COLOR.length;
+            let tmpColor:number = unit.color % Main.config.MAP_COLOR.length;
 
-            if(tmpColor < Main.MAP_COLOR.length - 1){
+            if(tmpColor < Main.config.MAP_COLOR.length - 1){
 
                 unit.color = tmpColor;
             }
@@ -569,19 +591,19 @@ class Main extends egret.DisplayObjectContainer {
 
     private unitFall():void{
 
-        for(let i:number = Main.MAP_WIDTH * Main.MAP_HEIGHT - 1 ; i > -1  ; i--){
+        for(let i:number = Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT - 1 ; i > -1  ; i--){
 
             let unit:MapUnit = this.unitArr[i];
 
             if(unit){
 
-                while(unit.pos < Main.MAP_WIDTH * (Main.MAP_HEIGHT - 1)){
+                while(unit.pos < Main.config.MAP_WIDTH * (Main.config.MAP_HEIGHT - 1)){
 
-                    if(!this.unitArr[unit.pos + Main.MAP_WIDTH]){
+                    if(!this.unitArr[unit.pos + Main.config.MAP_WIDTH]){
 
                         this.unitArr[unit.pos] = null;
 
-                        unit.pos += Main.MAP_WIDTH;
+                        unit.pos += Main.config.MAP_WIDTH;
 
                         this.unitArr[unit.pos] = unit;
                     }
@@ -594,9 +616,9 @@ class Main extends egret.DisplayObjectContainer {
         }
     }
 
-    private refill(_fixColor:boolean, _sameProbability:number, _addScore:boolean):void{
+    private refill(_fixColor:boolean, _sameProbability:number):void{
 
-        for(let i:number = Main.MAP_WIDTH * Main.MAP_HEIGHT - 1 ; i > -1  ; i--){
+        for(let i:number = Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT - 1 ; i > -1  ; i--){
 
             if(!this.unitArr[i]){
 
@@ -610,9 +632,9 @@ class Main extends egret.DisplayObjectContainer {
 
                     let arr:number[] = [];
 
-                    let x:number = i % Main.MAP_WIDTH;
+                    let x:number = i % Main.config.MAP_WIDTH;
 
-                    let y:number = Math.floor(i / Main.MAP_WIDTH);
+                    let y:number = Math.floor(i / Main.config.MAP_WIDTH);
 
                     if(x > 0){
 
@@ -622,16 +644,16 @@ class Main extends egret.DisplayObjectContainer {
 
                         if(tmpUnit){
 
-                            let tmpColor:number = tmpUnit.color % Main.MAP_COLOR.length;
+                            let tmpColor:number = tmpUnit.color % Main.config.MAP_COLOR.length;
 
-                            if(tmpColor < Main.MAP_COLOR.length - 2){
+                            if(tmpColor < Main.config.MAP_COLOR.length - 2){
 
                                 arr.push(tmpColor);
                             }
                         }
                     }
 
-                    if(x < Main.MAP_WIDTH - 1){
+                    if(x < Main.config.MAP_WIDTH - 1){
 
                         let pos = i + 1;
 
@@ -639,9 +661,9 @@ class Main extends egret.DisplayObjectContainer {
 
                         if(tmpUnit){
 
-                            let tmpColor:number = tmpUnit.color % Main.MAP_COLOR.length;
+                            let tmpColor:number = tmpUnit.color % Main.config.MAP_COLOR.length;
 
-                            if(tmpColor < Main.MAP_COLOR.length - 2){
+                            if(tmpColor < Main.config.MAP_COLOR.length - 2){
 
                                 arr.push(tmpColor);
                             }
@@ -650,32 +672,32 @@ class Main extends egret.DisplayObjectContainer {
 
                     if(y > 0){
 
-                        let pos = i - Main.MAP_WIDTH;
+                        let pos = i - Main.config.MAP_WIDTH;
 
                         let tmpUnit:MapUnit = this.unitArr[pos];
 
                         if(tmpUnit){
 
-                            let tmpColor:number = tmpUnit.color % Main.MAP_COLOR.length;
+                            let tmpColor:number = tmpUnit.color % Main.config.MAP_COLOR.length;
 
-                            if(tmpColor < Main.MAP_COLOR.length - 2){
+                            if(tmpColor < Main.config.MAP_COLOR.length - 2){
 
                                 arr.push(tmpColor);
                             }
                         }
                     }
 
-                    if(y < Main.MAP_HEIGHT - 1){
+                    if(y < Main.config.MAP_HEIGHT - 1){
 
-                        let pos = i + Main.MAP_WIDTH;
+                        let pos = i + Main.config.MAP_WIDTH;
 
                         let tmpUnit:MapUnit = this.unitArr[pos];
 
                         if(tmpUnit){
 
-                            let tmpColor:number = tmpUnit.color % Main.MAP_COLOR.length;
+                            let tmpColor:number = tmpUnit.color % Main.config.MAP_COLOR.length;
 
-                            if(tmpColor < Main.MAP_COLOR.length - 2){
+                            if(tmpColor < Main.config.MAP_COLOR.length - 2){
 
                                 arr.push(tmpColor);
                             }
@@ -690,17 +712,17 @@ class Main extends egret.DisplayObjectContainer {
                     }
                     else{
 
-                        color = Math.floor(Math.random() * (Main.MAP_COLOR.length - 2));
+                        color = Math.floor(Math.random() * (Main.config.MAP_COLOR.length - 2));
                     }
                 }
                 else{
 
-                    color = Math.floor(Math.random() * (Main.MAP_COLOR.length - 2));
+                    color = Math.floor(Math.random() * (Main.config.MAP_COLOR.length - 2));
                 }
 
                 if(_fixColor){
 
-                    unit.color = color + Main.MAP_COLOR.length * ((i % Main.MAP_WIDTH) + 1);
+                    unit.color = color + Main.config.MAP_COLOR.length * ((i % Main.config.MAP_WIDTH) + 1);
                 }
                 else{
 
@@ -709,13 +731,6 @@ class Main extends egret.DisplayObjectContainer {
 
                 unit.score = 1;
 
-                if(_addScore){
-
-                    this.score += unit.score;
-
-                    this.mainPanel.score.text = this.score.toString();
-                }
-
                 unit.area = null;
 
                 this.unitArr[i] = unit;
@@ -723,19 +738,31 @@ class Main extends egret.DisplayObjectContainer {
         }
     }
 
-    private start():void{
+    private setUnitDestroyTimes(_v:number):void{
 
-        this.unitDestroyTimes = Main.DEFAULT_DESTROY_TIMES;
-
-        this.score = 0;
+        this.unitDestroyTimes = _v;
 
         this.mainPanel.times.text = this.unitDestroyTimes.toString();
+    }
 
-        this.mainPanel.score.text = this.score.toString();
+    private setYear(_v:number):void{
 
-        this.refill(false, this.sameColorProbability, false);
+        this.year = _v;
+
+        this.mainPanel.year.text = this.year.toString();
+    }
+
+    private start():void{
+
+        this.setUnitDestroyTimes(Main.config.DEFAULT_DESTROY_TIMES);
+
+        this.setYear(0);
+
+        this.refill(false, this.sameColorProbability);
 
         this.refreshMap();
+
+        this.refreshScore();
     }
 
     private refreshMap():void{
@@ -744,7 +771,7 @@ class Main extends egret.DisplayObjectContainer {
 
         let arr:MapUnit[][] = [];
 
-        for(let i:number = 0, m:number = Main.MAP_WIDTH * Main.MAP_HEIGHT ; i < m; i++){
+        for(let i:number = 0, m:number = Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT ; i < m; i++){
 
             if(!dic[i]){
 
@@ -855,9 +882,9 @@ class Main extends egret.DisplayObjectContainer {
 
     private checkNeighbour(_arr:MapUnit[], _dic:{[key:number]:boolean}, _unit:MapUnit):void{
 
-        let x:number = _unit.pos % Main.MAP_WIDTH;
+        let x:number = _unit.pos % Main.config.MAP_WIDTH;
 
-        let y:number = Math.floor(_unit.pos / Main.MAP_WIDTH);
+        let y:number = Math.floor(_unit.pos / Main.config.MAP_WIDTH);
 
         if(x > 0){
 
@@ -873,7 +900,7 @@ class Main extends egret.DisplayObjectContainer {
             }
         }
 
-        if(x < Main.MAP_WIDTH - 1){
+        if(x < Main.config.MAP_WIDTH - 1){
 
             let tmpUnit:MapUnit = this.unitArr[_unit.pos + 1];
 
@@ -889,7 +916,7 @@ class Main extends egret.DisplayObjectContainer {
 
         if(y > 0){
 
-            let tmpUnit:MapUnit = this.unitArr[_unit.pos - Main.MAP_WIDTH];
+            let tmpUnit:MapUnit = this.unitArr[_unit.pos - Main.config.MAP_WIDTH];
 
             if(tmpUnit && tmpUnit.color == _unit.color && !_dic[tmpUnit.pos]){
 
@@ -901,9 +928,9 @@ class Main extends egret.DisplayObjectContainer {
             }
         }
 
-        if(y < Main.MAP_HEIGHT - 1){
+        if(y < Main.config.MAP_HEIGHT - 1){
 
-            let tmpUnit:MapUnit = this.unitArr[_unit.pos + Main.MAP_WIDTH];
+            let tmpUnit:MapUnit = this.unitArr[_unit.pos + Main.config.MAP_WIDTH];
 
             if(tmpUnit && tmpUnit.color == _unit.color && !_dic[tmpUnit.pos]){
 
@@ -948,7 +975,7 @@ class Main extends egret.DisplayObjectContainer {
 
     private reset():void{
 
-        for(let i:number = 0 ; i < Main.MAP_WIDTH * Main.MAP_HEIGHT ; i++){
+        for(let i:number = 0 ; i < Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT ; i++){
 
             let unit:MapUnit = this.unitArr[i];
 
@@ -998,7 +1025,7 @@ class Main extends egret.DisplayObjectContainer {
             r = r | (1 << _arr[i].pos);
         }
 
-        r |= _arr[0].color << (Main.MAP_WIDTH * Main.MAP_HEIGHT);
+        r |= _arr[0].color << (Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT);
 
         return r;
     }

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <e:Skin class="MainPanelSkin" width="640" height="1136" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
 	<w:Config id="16449abcb06" ></w:Config>
-	<e:Label text="Times:" width="100" height="50" verticalAlign="middle" textAlign="center" x="140" top="0" touchEnabled="false"/>
-	<e:Label text="Score:" width="100" height="50" verticalAlign="middle" textAlign="center" x="340" top="0" touchEnabled="false"/>
-	<e:Label id="score" text="12" width="200" height="50" verticalAlign="middle" textAlign="left" x="440" top="0" touchEnabled="false"/>
-	<e:Label id="times" text="12" width="100" height="50" verticalAlign="middle" textAlign="left" x="240" top="0" touchEnabled="false"/>
+	<e:Label text="Worker:" width="120" height="50" verticalAlign="middle" textAlign="center" top="0" touchEnabled="false" left="0"/>
+	<e:Label text="Year:" width="100" height="50" verticalAlign="middle" textAlign="center" top="0" touchEnabled="false" x="460" y="10"/>
+	<e:Label text="Score:" width="100" height="50" verticalAlign="middle" textAlign="center" x="200" top="0" touchEnabled="false"/>
+	<e:Label id="score" text="10000000" width="140" height="50" verticalAlign="middle" textAlign="left" x="300" top="0" touchEnabled="false"/>
+	<e:Label id="times" text="120" width="60" height="50" verticalAlign="middle" textAlign="left" x="120" top="0" touchEnabled="false"/>
+	<e:Label id="year" text="1000" width="80" height="50" verticalAlign="middle" textAlign="left" x="560" top="0" touchEnabled="false"/>
 </e:Skin>

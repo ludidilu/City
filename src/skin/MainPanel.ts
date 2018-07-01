@@ -4,6 +4,8 @@ class MainPanel extends eui.Component implements  eui.UIComponent {
 
 	public times:eui.Label;
 
+	public year:eui.Label;
+
 	public constructor() {
 		
 		super();

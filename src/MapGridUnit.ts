@@ -19,7 +19,7 @@ class MapGridUnit extends egret.DisplayObjectContainer{
 
     private initSp():void{
 
-        for(let i:number = 0, m:number = Main.MAP_COLOR.length - 1 ; i < m ; i++){
+        for(let i:number = 0, m:number = Main.config.MAP_COLOR.length - 1 ; i < m ; i++){
 
             let sp:egret.Shape = new egret.Shape();
 
@@ -27,27 +27,27 @@ class MapGridUnit extends egret.DisplayObjectContainer{
 
             this.spArr.push(sp);
 
-            sp.graphics.beginFill(Main.MAP_COLOR[i]);
+            sp.graphics.beginFill(Main.config.MAP_COLOR[i]);
 
             sp.graphics.lineStyle(MapArea.LINE_WIDTH);
 
-            sp.graphics.moveTo(Main.GUID_CUT_WIDTH, Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT);
+            sp.graphics.moveTo(Main.config.GUID_CUT_WIDTH, Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT);
 
-            sp.graphics.lineTo(Main.GUID_CUT_WIDTH, Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT - Main.GUID_CURVE_HEIGHT);
+            sp.graphics.lineTo(Main.config.GUID_CUT_WIDTH, Main.config.GUID_HEIGHT - Main.config.GUID_CUT_HEIGHT - Main.config.GUID_CURVE_HEIGHT);
 
-            sp.graphics.curveTo(Main.GUID_CUT_WIDTH, Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT, Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH, Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT);
+            sp.graphics.curveTo(Main.config.GUID_CUT_WIDTH, Main.config.GUID_HEIGHT - Main.config.GUID_CUT_HEIGHT, Main.config.GUID_CUT_WIDTH + Main.config.GUID_CURVE_WIDTH, Main.config.GUID_HEIGHT - Main.config.GUID_CUT_HEIGHT);
 
-            sp.graphics.lineTo(Main.GUID_WIDTH - Main.GUID_CUT_WIDTH - Main.GUID_CURVE_WIDTH, Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT);
+            sp.graphics.lineTo(Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH - Main.config.GUID_CURVE_WIDTH, Main.config.GUID_HEIGHT - Main.config.GUID_CUT_HEIGHT);
 
-            sp.graphics.curveTo(Main.GUID_WIDTH - Main.GUID_CUT_WIDTH, Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT, Main.GUID_WIDTH - Main.GUID_CUT_WIDTH, Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT - Main.GUID_CURVE_HEIGHT);
+            sp.graphics.curveTo(Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH, Main.config.GUID_HEIGHT - Main.config.GUID_CUT_HEIGHT, Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH, Main.config.GUID_HEIGHT - Main.config.GUID_CUT_HEIGHT - Main.config.GUID_CURVE_HEIGHT);
 
-            sp.graphics.lineTo(Main.GUID_WIDTH - Main.GUID_CUT_WIDTH, Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT);
+            sp.graphics.lineTo(Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH, Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT);
 
-            sp.graphics.curveTo(Main.GUID_WIDTH - Main.GUID_CUT_WIDTH, Main.GUID_CUT_HEIGHT, Main.GUID_WIDTH - Main.GUID_CUT_WIDTH - Main.GUID_CURVE_WIDTH, Main.GUID_CUT_HEIGHT);
+            sp.graphics.curveTo(Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH, Main.config.GUID_CUT_HEIGHT, Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH - Main.config.GUID_CURVE_WIDTH, Main.config.GUID_CUT_HEIGHT);
 
-            sp.graphics.lineTo(Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH, Main.GUID_CUT_HEIGHT);
+            sp.graphics.lineTo(Main.config.GUID_CUT_WIDTH + Main.config.GUID_CURVE_WIDTH, Main.config.GUID_CUT_HEIGHT);
 
-            sp.graphics.curveTo(Main.GUID_CUT_WIDTH, Main.GUID_CUT_HEIGHT, Main.GUID_CUT_WIDTH, Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT);
+            sp.graphics.curveTo(Main.config.GUID_CUT_WIDTH, Main.config.GUID_CUT_HEIGHT, Main.config.GUID_CUT_WIDTH, Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT);
 
             sp.visible = false;
         }
@@ -57,9 +57,9 @@ class MapGridUnit extends egret.DisplayObjectContainer{
 
         this.tf = new egret.TextField();
             
-        this.tf.width = Main.GUID_WIDTH;
+        this.tf.width = Main.config.GUID_WIDTH;
 
-        this.tf.height = Main.GUID_HEIGHT;
+        this.tf.height = Main.config.GUID_HEIGHT;
 
         this.tf.verticalAlign = egret.VerticalAlign.MIDDLE;
 
@@ -88,7 +88,7 @@ class MapGridUnit extends egret.DisplayObjectContainer{
 
     public reset():void{
 
-        for(let i:number = 0, m:number = Main.MAP_COLOR.length - 1 ; i < m ; i++){
+        for(let i:number = 0, m:number = Main.config.MAP_COLOR.length - 1 ; i < m ; i++){
 
             this.spArr[i].visible = false;
         }

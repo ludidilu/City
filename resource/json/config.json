@@ -1,0 +1,29 @@
+{
+    "GUID_WIDTH": 120,
+
+    "GUID_HEIGHT": 120,
+
+    "GUID_CUT_WIDTH": 10,
+
+    "GUID_CUT_HEIGHT": 10,
+
+    "GUID_CURVE_WIDTH": 10,
+
+    "GUID_CURVE_HEIGHT": 10,
+
+    "MAP_WIDTH": 5,
+
+    "MAP_HEIGHT": 5,
+
+    "MAP_COLOR": ["0xff0000", "0x00ff00", "0x5555ff", "0xff00ff", "0xffffff", "0xffff00"],
+
+    "DEFAULT_DESTROY_TIMES": 2,
+
+    "COMBINE_ADD_DESTROY_TIMES": 100,
+
+    "LEVEL_ADD_DESTROY_TIMES": 15,
+
+    "LEVEL_ARR": [1, 2, 3, 5, 8, 13, 21, 34, 55, 89],
+
+    "LEVEL_SCORE_ARR": [1, 5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920]
+}

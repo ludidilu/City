@@ -234,74 +234,74 @@ class MapArea extends egret.DisplayObjectContainer{
 
             let pos:number = unit.pos;
 
-            let x:number = pos % Main.MAP_WIDTH;
+            let x:number = pos % Main.config.MAP_WIDTH;
 
-            let y:number = Math.floor(pos / Main.MAP_WIDTH);
+            let y:number = Math.floor(pos / Main.config.MAP_WIDTH);
 
             let grid:MapGridUnit = MapArea.getGrid(this.gridContainer, pos);
 
             this.gridDic[pos] = grid;
 
-            grid.x = x * Main.GUID_WIDTH;
+            grid.x = x * Main.config.GUID_WIDTH;
 
-            grid.y = y * Main.GUID_HEIGHT;
+            grid.y = y * Main.config.GUID_HEIGHT;
 
             grid.setScore(unit.score, true);
 
             if(x == 0 || !(this.id & (1 << (pos - 1)))){
 
-                let sx:number = x * Main.GUID_WIDTH + Main.GUID_CUT_WIDTH;
+                let sx:number = x * Main.config.GUID_WIDTH + Main.config.GUID_CUT_WIDTH;
 
-                let sy:number = y * Main.GUID_HEIGHT + Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT;
+                let sy:number = y * Main.config.GUID_HEIGHT + Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT;
 
                 pointArr[0].push([sx, sy]);
 
                 let tx:number = sx;
 
-                let ty:number = sy + (Main.GUID_HEIGHT - (Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT) * 2);
+                let ty:number = sy + (Main.config.GUID_HEIGHT - (Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT) * 2);
 
                 pointArr[1].push([tx, ty]);
             }
 
-            if(x == Main.MAP_WIDTH - 1 || !(this.id & (1 << pos + 1))){
+            if(x == Main.config.MAP_WIDTH - 1 || !(this.id & (1 << pos + 1))){
 
-                let sx:number = x * Main.GUID_WIDTH + Main.GUID_CUT_WIDTH + (Main.GUID_WIDTH - Main.GUID_CUT_WIDTH * 2);
+                let sx:number = x * Main.config.GUID_WIDTH + Main.config.GUID_CUT_WIDTH + (Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH * 2);
 
-                let sy:number = y * Main.GUID_HEIGHT + Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT;
+                let sy:number = y * Main.config.GUID_HEIGHT + Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT;
 
                 pointArr[2].push([sx, sy]);
 
                 let tx:number = sx;
 
-                let ty:number = sy + (Main.GUID_HEIGHT - (Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT) * 2);
+                let ty:number = sy + (Main.config.GUID_HEIGHT - (Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT) * 2);
 
                 pointArr[3].push([tx, ty]);
             }
 
-            if(y == 0 || (!(this.id & (1 << (pos - Main.MAP_WIDTH))))){
+            if(y == 0 || (!(this.id & (1 << (pos - Main.config.MAP_WIDTH))))){
 
-                let sx:number = x * Main.GUID_WIDTH + Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH;
+                let sx:number = x * Main.config.GUID_WIDTH + Main.config.GUID_CUT_WIDTH + Main.config.GUID_CURVE_WIDTH;
 
-                let sy:number = y * Main.GUID_HEIGHT + Main.GUID_CUT_HEIGHT;
+                let sy:number = y * Main.config.GUID_HEIGHT + Main.config.GUID_CUT_HEIGHT;
 
                 pointArr[4].push([sx, sy]);
 
-                let tx:number = sx + (Main.GUID_WIDTH - (Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH) * 2);
+                let tx:number = sx + (Main.config.GUID_WIDTH - (Main.config.GUID_CUT_WIDTH + Main.config.GUID_CURVE_WIDTH) * 2);
 
                 let ty:number = sy;
 
                 pointArr[5].push([tx, ty]);
             }
 
-            if(y == Main.MAP_HEIGHT - 1 || !(this.id & (1 << (pos + Main.MAP_WIDTH)))){
+            if(y == Main.config.MAP_HEIGHT - 1 || !(this.id & (1 << (pos + Main.config.MAP_WIDTH)))){
 
-                let sx:number = x * Main.GUID_WIDTH + Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH;
+                let sx:number = x * Main.config.GUID_WIDTH + Main.config.GUID_CUT_WIDTH + Main.config.GUID_CURVE_WIDTH;
 
-                let sy:number = y * Main.GUID_HEIGHT + Main.GUID_CUT_HEIGHT + (Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT * 2);
+                let sy:number = y * Main.config.GUID_HEIGHT + Main.config.GUID_CUT_HEIGHT + (Main.config.GUID_HEIGHT - Main.config.GUID_CUT_HEIGHT * 2);
 
                 pointArr[6].push([sx, sy]);
 
-                let tx:number = sx + (Main.GUID_WIDTH - (Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH) * 2);
+                let tx:number = sx + (Main.config.GUID_WIDTH - (Main.config.GUID_CUT_WIDTH + Main.config.GUID_CURVE_WIDTH) * 2);
 
                 let ty:number = sy;
 
@@ -315,7 +315,7 @@ class MapArea extends egret.DisplayObjectContainer{
         
         let command:egret.Graphics = this.sp.graphics;
 
-        command.beginFill(Main.MAP_COLOR[this.unitArr[0].color % Main.MAP_COLOR.length]);
+        command.beginFill(Main.config.MAP_COLOR[this.unitArr[0].color % Main.config.MAP_COLOR.length]);
 
         command.lineStyle(MapArea.LINE_WIDTH);
 
@@ -323,7 +323,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
         if(_isStatic){
 
-            if(this.unitArr.length > 1 && this.unitArr[0].color < Main.MAP_COLOR.length - 2){
+            if(this.unitArr.length > 1 && this.unitArr[0].color < Main.config.MAP_COLOR.length - 2){
 
                 let score:number = 0;
 
@@ -334,7 +334,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 let level:number = MapArea.getLevel(score, false);
 
-                if(level == Main.LEVEL_ARR.length){
+                if(level == Main.config.LEVEL_ARR.length){
 
                     command = this.flashSp.graphics;
 
@@ -435,7 +435,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
             let tx:number = _x;
 
-            let ty:number = _y - (Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT) * 2;
+            let ty:number = _y - (Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT) * 2;
 
             if(this.arrContains(tx, ty, _arr[1])){
 
@@ -443,15 +443,15 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 let nx:number = _x;
 
-                let ny:number = _y - Main.GUID_HEIGHT;
+                let ny:number = _y - Main.config.GUID_HEIGHT;
 
                 this.drawLine(nx, ny, 0, _startX, _startY, _graphics, _arr);
             }
             else{
 
-                tx = _x + Main.GUID_CURVE_WIDTH;
+                tx = _x + Main.config.GUID_CURVE_WIDTH;
 
-                ty = _y - Main.GUID_CURVE_HEIGHT;
+                ty = _y - Main.config.GUID_CURVE_HEIGHT;
 
                 if(this.arrContains(tx, ty, _arr[4])){
 
@@ -461,7 +461,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     _graphics.curveTo(cx, cy, tx, ty);
 
-                    let nx:number = _x + (Main.GUID_WIDTH - Main.GUID_CUT_WIDTH * 2 - Main.GUID_CURVE_WIDTH);
+                    let nx:number = _x + (Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH * 2 - Main.config.GUID_CURVE_WIDTH);
 
                     let ny:number = ty;
 
@@ -469,9 +469,9 @@ class MapArea extends egret.DisplayObjectContainer{
                 }
                 else{
 
-                    tx = _x - (Main.GUID_CUT_WIDTH * 2 + Main.GUID_CURVE_WIDTH);
+                    tx = _x - (Main.config.GUID_CUT_WIDTH * 2 + Main.config.GUID_CURVE_WIDTH);
 
-                    ty = _y - (Main.GUID_CUT_HEIGHT * 2 + Main.GUID_CURVE_HEIGHT);
+                    ty = _y - (Main.config.GUID_CUT_HEIGHT * 2 + Main.config.GUID_CURVE_HEIGHT);
 
                     this.arrContains(tx, ty, _arr[7]);
 
@@ -481,7 +481,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     _graphics.curveTo(cx, cy, tx, ty);
 
-                    let nx:number = _x - (Main.GUID_WIDTH - Main.GUID_CURVE_WIDTH);
+                    let nx:number = _x - (Main.config.GUID_WIDTH - Main.config.GUID_CURVE_WIDTH);
 
                     let ny:number = ty;
 
@@ -495,7 +495,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
             tx = _x;
 
-            ty = _y + (Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT) * 2;
+            ty = _y + (Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT) * 2;
 
             if(this.arrContains(tx, ty, _arr[0])){
 
@@ -503,15 +503,15 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 let nx:number = _x;
 
-                let ny:number = _y + Main.GUID_HEIGHT;
+                let ny:number = _y + Main.config.GUID_HEIGHT;
 
                 this.drawLine(nx, ny, 1, _startX, _startY, _graphics, _arr);
             }
             else{
 
-                tx = _x + Main.GUID_CURVE_WIDTH;
+                tx = _x + Main.config.GUID_CURVE_WIDTH;
 
-                ty = _y + Main.GUID_CURVE_HEIGHT;
+                ty = _y + Main.config.GUID_CURVE_HEIGHT;
 
                 if(this.arrContains(tx, ty, _arr[6])){
 
@@ -521,7 +521,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     _graphics.curveTo(cx, cy, tx, ty);
 
-                    let nx:number = _x + (Main.GUID_WIDTH - Main.GUID_CUT_WIDTH * 2 - Main.GUID_CURVE_WIDTH);
+                    let nx:number = _x + (Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH * 2 - Main.config.GUID_CURVE_WIDTH);
 
                     let ny:number = ty;
 
@@ -529,9 +529,9 @@ class MapArea extends egret.DisplayObjectContainer{
                 }
                 else{
 
-                    tx = _x - (Main.GUID_CUT_WIDTH * 2 + Main.GUID_CURVE_WIDTH);
+                    tx = _x - (Main.config.GUID_CUT_WIDTH * 2 + Main.config.GUID_CURVE_WIDTH);
 
-                    ty = _y + (Main.GUID_CUT_HEIGHT * 2 + Main.GUID_CURVE_HEIGHT);
+                    ty = _y + (Main.config.GUID_CUT_HEIGHT * 2 + Main.config.GUID_CURVE_HEIGHT);
 
                     this.arrContains(tx, ty, _arr[5]);
 
@@ -541,7 +541,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     _graphics.curveTo(cx, cy, tx, ty);
 
-                    let nx:number = _x - (Main.GUID_WIDTH - Main.GUID_CUT_WIDTH);
+                    let nx:number = _x - (Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH);
 
                     let ny:number = ty;
 
@@ -555,7 +555,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
             tx = _x;
 
-            ty = _y - (Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT) * 2;
+            ty = _y - (Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT) * 2;
 
             if(this.arrContains(tx, ty, _arr[3])){
 
@@ -563,15 +563,15 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 let nx:number = _x;
 
-                let ny:number = _y - Main.GUID_HEIGHT;
+                let ny:number = _y - Main.config.GUID_HEIGHT;
 
                 this.drawLine(nx, ny, 2, _startX, _startY, _graphics, _arr);
             }
             else{
 
-                tx = _x - Main.GUID_CURVE_WIDTH;
+                tx = _x - Main.config.GUID_CURVE_WIDTH;
 
-                ty = _y - Main.GUID_CURVE_HEIGHT;
+                ty = _y - Main.config.GUID_CURVE_HEIGHT;
 
                 if(this.arrContains(tx, ty, _arr[5])){
 
@@ -581,7 +581,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     _graphics.curveTo(cx, cy, tx, ty);
 
-                    let nx:number = _x - (Main.GUID_WIDTH - Main.GUID_CUT_WIDTH * 2 - Main.GUID_CURVE_WIDTH);
+                    let nx:number = _x - (Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH * 2 - Main.config.GUID_CURVE_WIDTH);
 
                     let ny:number = ty;
 
@@ -589,9 +589,9 @@ class MapArea extends egret.DisplayObjectContainer{
                 }
                 else{
 
-                    tx = _x + (Main.GUID_CUT_WIDTH * 2 + Main.GUID_CURVE_WIDTH);
+                    tx = _x + (Main.config.GUID_CUT_WIDTH * 2 + Main.config.GUID_CURVE_WIDTH);
 
-                    ty = _y - (Main.GUID_CUT_HEIGHT * 2 + Main.GUID_CURVE_HEIGHT);
+                    ty = _y - (Main.config.GUID_CUT_HEIGHT * 2 + Main.config.GUID_CURVE_HEIGHT);
 
                     this.arrContains(tx, ty, _arr[6]);
 
@@ -601,7 +601,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     _graphics.curveTo(cx, cy, tx, ty);
 
-                    let nx:number = _x + (Main.GUID_WIDTH - Main.GUID_CUT_WIDTH);
+                    let nx:number = _x + (Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH);
 
                     let ny:number = ty;
 
@@ -615,7 +615,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
             tx = _x;
 
-            ty = _y + (Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT) * 2;
+            ty = _y + (Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT) * 2;
 
             if(this.arrContains(tx, ty, _arr[2])){
 
@@ -623,15 +623,15 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 let nx:number = _x;
 
-                let ny:number = _y + Main.GUID_HEIGHT;
+                let ny:number = _y + Main.config.GUID_HEIGHT;
 
                 this.drawLine(nx, ny, 3, _startX, _startY, _graphics, _arr);
             }
             else{
 
-                tx = _x - Main.GUID_CURVE_WIDTH;
+                tx = _x - Main.config.GUID_CURVE_WIDTH;
 
-                ty = _y + Main.GUID_CURVE_HEIGHT;
+                ty = _y + Main.config.GUID_CURVE_HEIGHT;
 
                 if(this.arrContains(tx, ty, _arr[7])){
 
@@ -641,7 +641,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     _graphics.curveTo(cx, cy, tx, ty);
 
-                    let nx:number = _x - (Main.GUID_WIDTH - Main.GUID_CUT_WIDTH * 2 - Main.GUID_CURVE_WIDTH);
+                    let nx:number = _x - (Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH * 2 - Main.config.GUID_CURVE_WIDTH);
 
                     let ny:number = ty;
 
@@ -649,9 +649,9 @@ class MapArea extends egret.DisplayObjectContainer{
                 }
                 else{
 
-                    tx = _x + (Main.GUID_CUT_WIDTH * 2 + Main.GUID_CURVE_WIDTH);
+                    tx = _x + (Main.config.GUID_CUT_WIDTH * 2 + Main.config.GUID_CURVE_WIDTH);
 
-                    ty = _y + (Main.GUID_CUT_HEIGHT * 2 + Main.GUID_CURVE_HEIGHT);
+                    ty = _y + (Main.config.GUID_CUT_HEIGHT * 2 + Main.config.GUID_CURVE_HEIGHT);
 
                     this.arrContains(tx, ty, _arr[4]);
 
@@ -661,7 +661,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     _graphics.curveTo(cx, cy, tx, ty);
 
-                    let nx:number = _x + (Main.GUID_WIDTH - Main.GUID_CUT_WIDTH);
+                    let nx:number = _x + (Main.config.GUID_WIDTH - Main.config.GUID_CUT_WIDTH);
 
                     let ny:number = ty;
 
@@ -673,7 +673,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
             case 4:
 
-            tx = _x - (Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH) * 2;
+            tx = _x - (Main.config.GUID_CUT_WIDTH + Main.config.GUID_CURVE_WIDTH) * 2;
 
             ty = _y;
 
@@ -681,7 +681,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 _graphics.lineTo(tx, ty);
 
-                let nx:number = _x - Main.GUID_WIDTH;
+                let nx:number = _x - Main.config.GUID_WIDTH;
 
                 let ny:number = _y;
 
@@ -689,9 +689,9 @@ class MapArea extends egret.DisplayObjectContainer{
             }
             else{
 
-                tx = _x - Main.GUID_CURVE_WIDTH;
+                tx = _x - Main.config.GUID_CURVE_WIDTH;
 
-                ty = _y + Main.GUID_CURVE_HEIGHT;
+                ty = _y + Main.config.GUID_CURVE_HEIGHT;
 
                 if(this.arrContains(tx, ty, _arr[0])){
 
@@ -703,15 +703,15 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     let nx:number = tx;
 
-                    let ny:number = _y + (Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT * 2 - Main.GUID_CURVE_HEIGHT);
+                    let ny:number = _y + (Main.config.GUID_HEIGHT - Main.config.GUID_CUT_HEIGHT * 2 - Main.config.GUID_CURVE_HEIGHT);
 
                     this.drawLine(nx, ny, 1, _startX, _startY, _graphics, _arr);
                 }
                 else{
 
-                    tx = _x - (Main.GUID_CUT_WIDTH * 2 + Main.GUID_CURVE_WIDTH);
+                    tx = _x - (Main.config.GUID_CUT_WIDTH * 2 + Main.config.GUID_CURVE_WIDTH);
 
-                    ty = _y - (Main.GUID_CUT_HEIGHT * 2 + Main.GUID_CURVE_HEIGHT);
+                    ty = _y - (Main.config.GUID_CUT_HEIGHT * 2 + Main.config.GUID_CURVE_HEIGHT);
 
                     this.arrContains(tx, ty, _arr[3])
 
@@ -723,7 +723,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     let nx:number = tx;
 
-                    let ny:number = _y - (Main.GUID_HEIGHT - Main.GUID_CURVE_HEIGHT);
+                    let ny:number = _y - (Main.config.GUID_HEIGHT - Main.config.GUID_CURVE_HEIGHT);
 
                     this.drawLine(nx, ny, 2, _startX, _startY, _graphics, _arr);
                 }
@@ -733,7 +733,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
             case 5:
 
-            tx = _x + (Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH) * 2;
+            tx = _x + (Main.config.GUID_CUT_WIDTH + Main.config.GUID_CURVE_WIDTH) * 2;
 
             ty = _y;
 
@@ -741,7 +741,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 _graphics.lineTo(tx, ty);
 
-                let nx:number = _x + Main.GUID_WIDTH;
+                let nx:number = _x + Main.config.GUID_WIDTH;
 
                 let ny:number = _y;
 
@@ -749,9 +749,9 @@ class MapArea extends egret.DisplayObjectContainer{
             }
             else{
 
-                tx = _x + Main.GUID_CURVE_WIDTH;
+                tx = _x + Main.config.GUID_CURVE_WIDTH;
 
-                ty = _y + Main.GUID_CURVE_HEIGHT;
+                ty = _y + Main.config.GUID_CURVE_HEIGHT;
 
                 if(this.arrContains(tx, ty, _arr[2])){
 
@@ -763,15 +763,15 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     let nx:number = tx;
 
-                    let ny:number = _y + (Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT * 2 - Main.GUID_CURVE_HEIGHT);
+                    let ny:number = _y + (Main.config.GUID_HEIGHT - Main.config.GUID_CUT_HEIGHT * 2 - Main.config.GUID_CURVE_HEIGHT);
 
                     this.drawLine(nx, ny, 3, _startX, _startY, _graphics, _arr);
                 }
                 else{
 
-                    tx = _x + (Main.GUID_CUT_WIDTH * 2 + Main.GUID_CURVE_WIDTH);
+                    tx = _x + (Main.config.GUID_CUT_WIDTH * 2 + Main.config.GUID_CURVE_WIDTH);
 
-                    ty = _y - (Main.GUID_CUT_HEIGHT * 2 + Main.GUID_CURVE_HEIGHT);
+                    ty = _y - (Main.config.GUID_CUT_HEIGHT * 2 + Main.config.GUID_CURVE_HEIGHT);
 
                     this.arrContains(tx, ty, _arr[1]);
 
@@ -783,7 +783,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     let nx:number = tx;
 
-                    let ny:number = _y - (Main.GUID_HEIGHT - Main.GUID_CURVE_HEIGHT);
+                    let ny:number = _y - (Main.config.GUID_HEIGHT - Main.config.GUID_CURVE_HEIGHT);
 
                     this.drawLine(nx, ny, 0, _startX, _startY, _graphics, _arr);
                 }
@@ -793,7 +793,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
             case 6:
 
-            tx = _x - (Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH) * 2;
+            tx = _x - (Main.config.GUID_CUT_WIDTH + Main.config.GUID_CURVE_WIDTH) * 2;
 
             ty = _y;
 
@@ -801,7 +801,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 _graphics.lineTo(tx, ty);
 
-                let nx:number = _x - Main.GUID_WIDTH;
+                let nx:number = _x - Main.config.GUID_WIDTH;
 
                 let ny:number = _y;
 
@@ -809,9 +809,9 @@ class MapArea extends egret.DisplayObjectContainer{
             }
             else{
 
-                tx = _x - Main.GUID_CURVE_WIDTH;
+                tx = _x - Main.config.GUID_CURVE_WIDTH;
 
-                ty = _y - Main.GUID_CURVE_HEIGHT;
+                ty = _y - Main.config.GUID_CURVE_HEIGHT;
 
                 if(this.arrContains(tx, ty, _arr[1])){
 
@@ -823,15 +823,15 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     let nx:number = tx;
 
-                    let ny:number = _y - (Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT * 2 - Main.GUID_CURVE_HEIGHT);
+                    let ny:number = _y - (Main.config.GUID_HEIGHT - Main.config.GUID_CUT_HEIGHT * 2 - Main.config.GUID_CURVE_HEIGHT);
 
                     this.drawLine(nx, ny, 0, _startX, _startY, _graphics, _arr);
                 }
                 else{
 
-                    tx = _x - (Main.GUID_CUT_WIDTH * 2 + Main.GUID_CURVE_WIDTH);
+                    tx = _x - (Main.config.GUID_CUT_WIDTH * 2 + Main.config.GUID_CURVE_WIDTH);
 
-                    ty = _y + (Main.GUID_CUT_HEIGHT * 2 + Main.GUID_CURVE_HEIGHT);
+                    ty = _y + (Main.config.GUID_CUT_HEIGHT * 2 + Main.config.GUID_CURVE_HEIGHT);
 
                     this.arrContains(tx, ty, _arr[2]);
 
@@ -843,7 +843,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     let nx:number = tx;
 
-                    let ny:number = _y + (Main.GUID_HEIGHT - Main.GUID_CURVE_HEIGHT);
+                    let ny:number = _y + (Main.config.GUID_HEIGHT - Main.config.GUID_CURVE_HEIGHT);
 
                     this.drawLine(nx, ny, 3, _startX, _startY, _graphics, _arr);
                 }
@@ -853,7 +853,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
             default:
 
-            tx = _x + (Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH) * 2;
+            tx = _x + (Main.config.GUID_CUT_WIDTH + Main.config.GUID_CURVE_WIDTH) * 2;
 
             ty = _y;
 
@@ -861,7 +861,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 _graphics.lineTo(tx, ty);
 
-                let nx:number = _x + Main.GUID_WIDTH;
+                let nx:number = _x + Main.config.GUID_WIDTH;
 
                 let ny:number = _y;
 
@@ -869,9 +869,9 @@ class MapArea extends egret.DisplayObjectContainer{
             }
             else{
 
-                tx = _x + Main.GUID_CURVE_WIDTH;
+                tx = _x + Main.config.GUID_CURVE_WIDTH;
 
-                ty = _y - Main.GUID_CURVE_HEIGHT;
+                ty = _y - Main.config.GUID_CURVE_HEIGHT;
 
                 if(this.arrContains(tx, ty, _arr[3])){
 
@@ -883,15 +883,15 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     let nx:number = tx;
 
-                    let ny:number = _y - (Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT * 2 - Main.GUID_CURVE_HEIGHT);
+                    let ny:number = _y - (Main.config.GUID_HEIGHT - Main.config.GUID_CUT_HEIGHT * 2 - Main.config.GUID_CURVE_HEIGHT);
 
                     this.drawLine(nx, ny, 2, _startX, _startY, _graphics, _arr);
                 }
                 else{
 
-                    tx = _x + (Main.GUID_CUT_WIDTH * 2 + Main.GUID_CURVE_WIDTH);
+                    tx = _x + (Main.config.GUID_CUT_WIDTH * 2 + Main.config.GUID_CURVE_WIDTH);
 
-                    ty = _y + (Main.GUID_CUT_HEIGHT * 2 + Main.GUID_CURVE_HEIGHT);
+                    ty = _y + (Main.config.GUID_CUT_HEIGHT * 2 + Main.config.GUID_CURVE_HEIGHT);
 
                     this.arrContains(tx, ty, _arr[0]);
 
@@ -903,7 +903,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     let nx:number = tx;
 
-                    let ny:number = _y + (Main.GUID_HEIGHT - Main.GUID_CURVE_HEIGHT);
+                    let ny:number = _y + (Main.config.GUID_HEIGHT - Main.config.GUID_CURVE_HEIGHT);
 
                     this.drawLine(nx, ny, 1, _startX, _startY, _graphics, _arr);
                 }
@@ -934,13 +934,13 @@ class MapArea extends egret.DisplayObjectContainer{
 
         this.stopFlash();
 
-        let x:number = _unit.pos % Main.MAP_WIDTH;
+        let x:number = _unit.pos % Main.config.MAP_WIDTH;
 
-        let y:number = Math.floor(_unit.pos / Main.MAP_WIDTH);
+        let y:number = Math.floor(_unit.pos / Main.config.MAP_WIDTH);
 
-        this.anchorOffsetX = (x + 0.5) * Main.GUID_WIDTH;
+        this.anchorOffsetX = (x + 0.5) * Main.config.GUID_WIDTH;
 
-        this.anchorOffsetY = (y + 0.5) * Main.GUID_HEIGHT;
+        this.anchorOffsetY = (y + 0.5) * Main.config.GUID_HEIGHT;
 
         this.x = this.anchorOffsetX;
 
@@ -984,7 +984,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
             let color:number = self.unitArr[0].color;
 
-            color = color % Main.MAP_COLOR.length;
+            color = color % Main.config.MAP_COLOR.length;
 
             guid.showSp(color);
 
@@ -1000,7 +1000,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
         self.gridContainer.setChildIndex(baseGrid, -1);
 
-        let canOverMaxLevel:boolean = _unit.color > Main.MAP_COLOR.length - 2;
+        let canOverMaxLevel:boolean = _unit.color > Main.config.MAP_COLOR.length - 2;
 
         let cb:(_v:number)=>void = function(_v:number):void{
 
@@ -1016,9 +1016,9 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     if(tmpPos == _unit.pos){
 
-                        guid.x = (tmpPos % Main.MAP_WIDTH) * Main.GUID_WIDTH;
+                        guid.x = (tmpPos % Main.config.MAP_WIDTH) * Main.config.GUID_WIDTH;
 
-                        guid.y = Math.floor(tmpPos / Main.MAP_WIDTH) * Main.GUID_HEIGHT;
+                        guid.y = Math.floor(tmpPos / Main.config.MAP_WIDTH) * Main.config.GUID_HEIGHT;
 
                         arr.splice(i, 1);
 
@@ -1029,23 +1029,23 @@ class MapArea extends egret.DisplayObjectContainer{
                         break;
                     }
 
-                    let lastX:number = tmpPos % Main.MAP_WIDTH;
+                    let lastX:number = tmpPos % Main.config.MAP_WIDTH;
 
-                    let lastY:number = Math.floor(tmpPos / Main.MAP_WIDTH);
+                    let lastY:number = Math.floor(tmpPos / Main.config.MAP_WIDTH);
 
                     tmpPos = path[tmpPos];
 
                     if(v <= 1){
 
-                        let nowX:number = tmpPos % Main.MAP_WIDTH;
+                        let nowX:number = tmpPos % Main.config.MAP_WIDTH;
 
-                        let nowY:number = Math.floor(tmpPos / Main.MAP_WIDTH);
+                        let nowY:number = Math.floor(tmpPos / Main.config.MAP_WIDTH);
 
-                        guid.x = (lastX + (nowX - lastX) * v) * Main.GUID_WIDTH;
+                        guid.x = (lastX + (nowX - lastX) * v) * Main.config.GUID_WIDTH;
 
-                        guid.y = (lastY + (nowY - lastY) * v) * Main.GUID_HEIGHT;
+                        guid.y = (lastY + (nowY - lastY) * v) * Main.config.GUID_HEIGHT;
 
-                        if(guid.x == (_unit.pos % Main.MAP_WIDTH) * Main.GUID_WIDTH && guid.y == Math.floor(_unit.pos / Main.MAP_WIDTH) * Main.GUID_HEIGHT){
+                        if(guid.x == (_unit.pos % Main.config.MAP_WIDTH) * Main.config.GUID_WIDTH && guid.y == Math.floor(_unit.pos / Main.config.MAP_WIDTH) * Main.config.GUID_HEIGHT){
 
                             arr.splice(i, 1);
 
@@ -1095,9 +1095,9 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 let nowPos:number = arr2[i];
 
-                let x:number = nowPos % Main.MAP_WIDTH;
+                let x:number = nowPos % Main.config.MAP_WIDTH;
 
-                let y:number = Math.floor(nowPos / Main.MAP_WIDTH);
+                let y:number = Math.floor(nowPos / Main.config.MAP_WIDTH);
 
                 if(x > 0){
 
@@ -1118,7 +1118,7 @@ class MapArea extends egret.DisplayObjectContainer{
                     }
                 }
 
-                if(x < Main.MAP_WIDTH - 1){
+                if(x < Main.config.MAP_WIDTH - 1){
 
                     let pos:number = nowPos + 1;
 
@@ -1139,7 +1139,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 if(y > 0){
 
-                    let pos:number = nowPos - Main.MAP_WIDTH;
+                    let pos:number = nowPos - Main.config.MAP_WIDTH;
 
                     if(this.id & (1 << pos)){
 
@@ -1156,9 +1156,9 @@ class MapArea extends egret.DisplayObjectContainer{
                     }
                 }
 
-                if(y < Main.MAP_HEIGHT - 1){
+                if(y < Main.config.MAP_HEIGHT - 1){
 
-                    let pos:number = nowPos + Main.MAP_WIDTH;
+                    let pos:number = nowPos + Main.config.MAP_WIDTH;
 
                     if(this.id & (1 << pos)){
 
@@ -1182,9 +1182,9 @@ class MapArea extends egret.DisplayObjectContainer{
 
     public static getLevel(_score:number, _canOverMaxLevel:boolean):number{
 
-        for(let i:number = 0, m:number = Main.LEVEL_ARR.length ; i < m ; i++){
+        for(let i:number = 0, m:number = Main.config.LEVEL_ARR.length ; i < m ; i++){
 
-            if(_score < Main.LEVEL_ARR[i]){
+            if(_score < Main.config.LEVEL_ARR[i]){
 
                 return i;
             }
@@ -1192,11 +1192,11 @@ class MapArea extends egret.DisplayObjectContainer{
 
         if(!_canOverMaxLevel){
 
-            return Main.LEVEL_ARR.length;
+            return Main.config.LEVEL_ARR.length;
         }
         else{
 
-            return Main.LEVEL_ARR.length + _score / Main.LEVEL_ARR[Main.LEVEL_ARR.length - 1] - 1;
+            return Main.config.LEVEL_ARR.length + _score / Main.config.LEVEL_ARR[Main.config.LEVEL_ARR.length - 1] - 1;
         }
     }
 }

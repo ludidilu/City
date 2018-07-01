@@ -1,7 +1,7 @@
 {
 	"groups": [
 		{
-			"keys": "button_down_png,button_up_png,description_json,aaa_json",
+			"keys": "button_down_png,button_up_png,description_json,aaa_json,config_json",
 			"name": "preload"
 		}
 	],
@@ -25,6 +25,11 @@
 			"name": "aaa_json",
 			"type": "json",
 			"url": "json/aaa.json"
+		},
+		{
+			"name": "config_json",
+			"type": "json",
+			"url": "json/config.json"
 		}
 	]
 }
