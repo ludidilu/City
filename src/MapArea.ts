@@ -27,125 +27,6 @@ class GraphicsList{
     }
 }
 
-class MapGridUnit extends egret.DisplayObjectContainer{
-
-    private tf:egret.TextField;
-
-    private spArr:egret.Shape[] = [];
-
-    public pos:number;
-
-    public score:number;
-
-    public init():void{
-
-        this.initSp();
-
-        this.initTf();
-
-        this.touchChildren = false;
-    }
-
-    private initSp():void{
-
-        for(let i:number = 0, m:number = Main.MAP_COLOR.length - 1 ; i < m ; i++){
-
-            let sp:egret.Shape = new egret.Shape();
-
-            this.addChild(sp);
-
-            this.spArr.push(sp);
-
-            sp.graphics.beginFill(Main.MAP_COLOR[i]);
-
-            sp.graphics.lineStyle(MapArea.LINE_WIDTH);
-
-            sp.graphics.moveTo(Main.GUID_CUT_WIDTH, Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT);
-
-            sp.graphics.lineTo(Main.GUID_CUT_WIDTH, Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT - Main.GUID_CURVE_HEIGHT);
-
-            sp.graphics.curveTo(Main.GUID_CUT_WIDTH, Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT, Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH, Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT);
-
-            sp.graphics.lineTo(Main.GUID_WIDTH - Main.GUID_CUT_WIDTH - Main.GUID_CURVE_WIDTH, Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT);
-
-            sp.graphics.curveTo(Main.GUID_WIDTH - Main.GUID_CUT_WIDTH, Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT, Main.GUID_WIDTH - Main.GUID_CUT_WIDTH, Main.GUID_HEIGHT - Main.GUID_CUT_HEIGHT - Main.GUID_CURVE_HEIGHT);
-
-            sp.graphics.lineTo(Main.GUID_WIDTH - Main.GUID_CUT_WIDTH, Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT);
-
-            sp.graphics.curveTo(Main.GUID_WIDTH - Main.GUID_CUT_WIDTH, Main.GUID_CUT_HEIGHT, Main.GUID_WIDTH - Main.GUID_CUT_WIDTH - Main.GUID_CURVE_WIDTH, Main.GUID_CUT_HEIGHT);
-
-            sp.graphics.lineTo(Main.GUID_CUT_WIDTH + Main.GUID_CURVE_WIDTH, Main.GUID_CUT_HEIGHT);
-
-            sp.graphics.curveTo(Main.GUID_CUT_WIDTH, Main.GUID_CUT_HEIGHT, Main.GUID_CUT_WIDTH, Main.GUID_CUT_HEIGHT + Main.GUID_CURVE_HEIGHT);
-
-            sp.visible = false;
-        }
-    }
-
-    private initTf():void{
-
-        this.tf = new egret.TextField();
-            
-        this.tf.width = Main.GUID_WIDTH;
-
-        this.tf.height = Main.GUID_HEIGHT;
-
-        this.tf.verticalAlign = egret.VerticalAlign.MIDDLE;
-
-        this.tf.textAlign = egret.HorizontalAlign.CENTER;
-
-        this.tf.bold = true;
-
-        this.tf.textColor = 0x000000;
-
-        this.addChild(this.tf);
-    }
-
-    public setScore(_score:number, _canOverMaxLevel:boolean):void{
-
-        this.score = _score;
-
-        let level:number = this.getLevel(_canOverMaxLevel);
-
-        this.tf.text = level.toString();
-    }
-
-    public getLevel(_canOverMaxLevel:boolean):number{
-
-        for(let i:number = 0, m:number = Main.LEVEL_ARR.length ; i < m ; i++){
-
-            if(this.score < Main.LEVEL_ARR[i]){
-
-                return i;
-            }
-        }
-
-        if(!_canOverMaxLevel){
-
-            return Main.LEVEL_ARR.length;
-        }
-        else{
-
-            return Main.LEVEL_ARR.length + this.score / Main.LEVEL_ARR[Main.LEVEL_ARR.length - 1] - 1;
-        }
-    }
-
-    public showSp(_index:number):void{
-
-        this.spArr[_index].visible = true;
-    }
-
-    public reset():void{
-
-        for(let i:number = 0, m:number = Main.MAP_COLOR.length - 1 ; i < m ; i++){
-
-            this.spArr[i].visible = false;
-        }
-
-        this.x = this.y = 0;
-    }
-}
-
 class MapArea extends egret.DisplayObjectContainer{
 
     public static readonly LINE_WIDTH:number = 5;
@@ -166,11 +47,15 @@ class MapArea extends egret.DisplayObjectContainer{
 
     private sp:egret.Shape;
 
+    private flashSp:egret.Shape;
+
     private pointArr:number[][][] = [];
 
     private gridDic:{[key:number]:MapGridUnit} = {}
 
     private maskArr:egret.Shape[] = [];
+
+    private flashTweenIndex:number = -1;
 
     public init():void{
 
@@ -185,6 +70,12 @@ class MapArea extends egret.DisplayObjectContainer{
         this.sp = new egret.Shape();
 
         this.spContainer.addChild(this.sp);
+
+        this.flashSp = new egret.Shape();
+
+        this.spContainer.addChild(this.flashSp);
+
+        this.flashSp.visible = false;
 
         for(let i:number = 0 ; i < 8 ; i++){
 
@@ -210,6 +101,8 @@ class MapArea extends egret.DisplayObjectContainer{
         this.releaseMask();
 
         this.releaseGraphics();
+
+        this.stopFlash();
     }
 
     private releaseMask():void{
@@ -286,19 +179,52 @@ class MapArea extends egret.DisplayObjectContainer{
         return sp;
     }
 
-    public setData(_unitArr:MapUnit[], _id, _checkCircle:boolean):boolean{
+    private startFlash():void{
+
+        if(this.flashTweenIndex == -1){
+
+            this.flashSp.visible = true;
+
+            this.flash0();
+        }
+    }
+
+    private stopFlash():void{
+
+        if(this.flashTweenIndex != -1){
+
+            SuperTween.getInstance().remove(this.flashTweenIndex);
+
+            this.flashTweenIndex = -1;
+
+            this.flashSp.visible = false;
+
+            this.flashSp.graphics.clear();
+        }
+    }
+
+    private flash0():void{
+
+        this.flashTweenIndex = SuperTween.getInstance().to2(0, 0.5, 500,this.flashChangeAlpha.bind(this), this.flash1.bind(this));
+    }
+
+    private flash1():void{
+
+        this.flashTweenIndex = SuperTween.getInstance().to2(0.5, 0, 500,this.flashChangeAlpha.bind(this), this.flash0.bind(this));
+    }
+
+    private flashChangeAlpha(_v:number):void{
+
+        this.flashSp.alpha = _v;
+    }
+
+    public setData(_unitArr:MapUnit[], _id, _isStatic:boolean):boolean{
 
         this.unitArr = _unitArr;
 
         this.id = _id;
 
-        let command:egret.Graphics = this.sp.graphics;
-
         let pointArr:number[][][] = this.pointArr;
-
-        command.beginFill(Main.MAP_COLOR[this.unitArr[0].color % Main.MAP_COLOR.length]);
-
-        command.lineStyle(MapArea.LINE_WIDTH);
 
         for(let i:number = 0, m:number = this.unitArr.length; i < m ; i++){
 
@@ -386,14 +312,46 @@ class MapArea extends egret.DisplayObjectContainer{
         let sx:number = pointArr[0][0][0];
 
         let sy:number = pointArr[0][0][1];
+        
+        let command:egret.Graphics = this.sp.graphics;
+
+        command.beginFill(Main.MAP_COLOR[this.unitArr[0].color % Main.MAP_COLOR.length]);
+
+        command.lineStyle(MapArea.LINE_WIDTH);
 
         MapArea.graphicsList.list.push(command);
+
+        if(_isStatic){
+
+            if(this.unitArr.length > 1 && this.unitArr[0].color < Main.MAP_COLOR.length - 2){
+
+                let score:number = 0;
+
+                for(let i:number = 0, m:number = this.unitArr.length ; i < m ; i++){
+
+                    score += this.unitArr[i].score;
+                }
+
+                let level:number = MapArea.getLevel(score, false);
+
+                if(level == Main.LEVEL_ARR.length){
+
+                    command = this.flashSp.graphics;
+
+                    command.beginFill(0xffffff);
+
+                    MapArea.graphicsList.list.push(command);
+
+                    this.startFlash();
+                }
+            }
+        }
 
         this.drawLine(sx, sy, 0, sx, sy, MapArea.graphicsList, pointArr, true);
 
         MapArea.graphicsList.list.length = 0;
 
-        if(!_checkCircle){
+        if(!_isStatic){
 
             return false;
         }
@@ -974,6 +932,8 @@ class MapArea extends egret.DisplayObjectContainer{
 
     public async fade(_unit:MapUnit){
 
+        this.stopFlash();
+
         let x:number = _unit.pos % Main.MAP_WIDTH;
 
         let y:number = Math.floor(_unit.pos / Main.MAP_WIDTH);
@@ -1001,6 +961,8 @@ class MapArea extends egret.DisplayObjectContainer{
     }
 
     public async fade2(_unit:MapUnit){
+
+        this.stopFlash();
 
         let self:MapArea = this;
 
@@ -1216,5 +1178,25 @@ class MapArea extends egret.DisplayObjectContainer{
         }
 
         return searchDis;
+    }
+
+    public static getLevel(_score:number, _canOverMaxLevel:boolean):number{
+
+        for(let i:number = 0, m:number = Main.LEVEL_ARR.length ; i < m ; i++){
+
+            if(_score < Main.LEVEL_ARR[i]){
+
+                return i;
+            }
+        }
+
+        if(!_canOverMaxLevel){
+
+            return Main.LEVEL_ARR.length;
+        }
+        else{
+
+            return Main.LEVEL_ARR.length + _score / Main.LEVEL_ARR[Main.LEVEL_ARR.length - 1] - 1;
+        }
     }
 }

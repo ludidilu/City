@@ -1,5 +1,7 @@
 class SuperTweenUnit{
 
+    public index:number;
+
     public start:number;
 
     public end:number;
@@ -29,56 +31,75 @@ class SuperTween{
         return SuperTween.instance;
     }
 
-    private list:SuperTweenUnit[] = [];    
+    private index:number = 0;
+
+    private dic:{[key:number]:SuperTweenUnit} = {};
+
+    private tmpList:SuperTweenUnit[] = [];
 
     private init():void{
 
         SuperTicker.getInstance().addEventListener(this.update, this);
     }
 
+    private getIndex():number{
+
+        this.index++;
+
+        return this.index;
+    }
+
     private update(_dt:number):void{
 
-        let arr:SuperTweenUnit[] = [];
+        for(let key in this.dic){
 
-        for(let i:number = 0, m:number = this.list.length ; i < m ; i++){
-
-            arr.push(this.list[i]);
+            this.tmpList.push(this.dic[key]);
         }
 
-        for(let i:number = 0, m:number = arr.length ; i < m ; i++){
+        for(let i:number = 0, m:number = this.tmpList.length ; i < m ; i++){
 
-            let unit:SuperTweenUnit = arr[i];
+            let unit:SuperTweenUnit = this.tmpList[i];
 
-            unit.timeLong -= _dt;
+            if(this.dic[unit.index]){
 
-            if(unit.timeLong <= 0){
+                unit.timeLong -= _dt;
 
-                this.list.splice(this.list.indexOf(unit), 1);
+                if(unit.timeLong <= 0){
 
-                if(unit.cb){
+                    delete this.dic[unit.index];
 
-                    unit.cb(unit.end);
+                    if(unit.cb){
+
+                        unit.cb(unit.end);
+                    }
+
+                    if(unit.endCb){
+
+                        unit.endCb();
+                    }
                 }
+                else{
 
-                unit.endCb();
-            }
-            else{
+                    if(unit.cb){
 
-                if(unit.cb){
+                        let v:number = unit.start + (unit.end - unit.start) * (unit.time - unit.timeLong) / unit.time;
 
-                    let v:number = unit.start + (unit.end - unit.start) * (unit.time - unit.timeLong) / unit.time;
-
-                    unit.cb(v);
+                        unit.cb(v);
+                    }
                 }
             }
         }
+
+        this.tmpList.length = 0;
     }
 
     public async to(_start:number, _end:number, _time:number, _cb:(_v:number)=>void){
 
-        let unit:SuperTweenUnit = {start:_start, end:_end, time:_time, timeLong:_time, cb:_cb};
+        let index:number = this.getIndex();
 
-        this.list.push(unit);
+        let unit:SuperTweenUnit = {index:index, start:_start, end:_end, time:_time, timeLong:_time, cb:_cb};
+
+        this.dic[index] = unit;
 
         let fun:(resolve:()=>void)=>void = function(resolve:()=>void):void{
 
@@ -86,5 +107,24 @@ class SuperTween{
         };
 
         return new Promise(fun);
+    }
+
+     public to2(_start:number, _end:number, _time:number, _cb:(_v:number)=>void, _endCb:()=>void):number{
+
+        let index:number = this.getIndex();
+
+        let unit:SuperTweenUnit = {index:index, start:_start, end:_end, time:_time, timeLong:_time, cb:_cb, endCb:_endCb};
+
+        this.dic[index] = unit;
+
+        return index;
+    }
+
+    public remove(_index:number):void{
+
+        if(this.dic[_index]){
+
+            delete this.dic[_index];
+        }
     }
 }
