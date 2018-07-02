@@ -166,6 +166,8 @@ class Main extends egret.DisplayObjectContainer {
 
         this.clickContainer = new egret.DisplayObjectContainer();
 
+        this.clickContainer.cacheAsBitmap = true;
+
         this.gameContainer.addChild(this.clickContainer);
 
         this.mapContainer = new egret.DisplayObjectContainer();
