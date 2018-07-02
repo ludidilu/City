@@ -45,6 +45,10 @@ class MapArea extends egret.DisplayObjectContainer{
 
     private static graphicsList:GraphicsList = new GraphicsList();
 
+    private static pointArr:number[][][];
+
+    private static pointArrPool:number[][] = [];
+
     public unitArr:MapUnit[] = [];
 
     public id:number;
@@ -62,8 +66,6 @@ class MapArea extends egret.DisplayObjectContainer{
     private rt:egret.RenderTexture;
 
     private bp:egret.Bitmap;
-
-    private pointArr:number[][][] = [];
 
     private gridDic:{[key:number]:MapGridUnit} = {}
 
@@ -102,9 +104,14 @@ class MapArea extends egret.DisplayObjectContainer{
 
         this.flashSp.visible = false;
 
-        for(let i:number = 0 ; i < 8 ; i++){
+        if(!MapArea.pointArr){
 
-            this.pointArr[i] = [];
+            MapArea.pointArr = [];
+
+            for(let i:number = 0 ; i < 8 ; i++){
+
+                MapArea.pointArr[i] = [];
+            }
         }
     }
 
@@ -268,6 +275,11 @@ class MapArea extends egret.DisplayObjectContainer{
 
     public setData(_unitArr:MapUnit[], _id, _isStatic:boolean):boolean{
 
+        if(_unitArr.length == 0){
+
+            console.log("fff");
+        }
+
         for(let i:number = 0, m:number = _unitArr.length ; i < m ; i++){
 
             this.unitArr.push(_unitArr[i]);
@@ -275,7 +287,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
         this.id = _id;
 
-        let pointArr:number[][][] = this.pointArr;
+        let pointArr:number[][][] = MapArea.pointArr;
 
         for(let i:number = 0, m:number = this.unitArr.length; i < m ; i++){
 
@@ -305,13 +317,17 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 let sy:number = y * Main.config.GUID_HEIGHT + Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT;
 
-                pointArr[0].push([sx, sy]);
+                let arr:number[] = MapArea.getPointArr(sx, sy);
+
+                pointArr[0].push(arr);
 
                 let tx:number = sx;
 
                 let ty:number = sy + (Main.config.GUID_HEIGHT - (Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT) * 2);
 
-                pointArr[1].push([tx, ty]);
+                arr = MapArea.getPointArr(tx, ty);
+
+                pointArr[1].push(arr);
             }
 
             if(x == Main.config.MAP_WIDTH - 1 || !(this.id & (1 << pos + 1))){
@@ -320,13 +336,17 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 let sy:number = y * Main.config.GUID_HEIGHT + Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT;
 
-                pointArr[2].push([sx, sy]);
+                let arr:number[] = MapArea.getPointArr(sx, sy);
+
+                pointArr[2].push(arr);
 
                 let tx:number = sx;
 
                 let ty:number = sy + (Main.config.GUID_HEIGHT - (Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT) * 2);
 
-                pointArr[3].push([tx, ty]);
+                arr = MapArea.getPointArr(tx, ty);
+
+                pointArr[3].push(arr);
             }
 
             if(y == 0 || (!(this.id & (1 << (pos - Main.config.MAP_WIDTH))))){
@@ -335,13 +355,17 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 let sy:number = y * Main.config.GUID_HEIGHT + Main.config.GUID_CUT_HEIGHT;
 
-                pointArr[4].push([sx, sy]);
+                let arr:number[] = MapArea.getPointArr(sx, sy);
+
+                pointArr[4].push(arr);
 
                 let tx:number = sx + (Main.config.GUID_WIDTH - (Main.config.GUID_CUT_WIDTH + Main.config.GUID_CURVE_WIDTH) * 2);
 
                 let ty:number = sy;
 
-                pointArr[5].push([tx, ty]);
+                arr = MapArea.getPointArr(tx, ty);
+
+                pointArr[5].push(arr);
             }
 
             if(y == Main.config.MAP_HEIGHT - 1 || !(this.id & (1 << (pos + Main.config.MAP_WIDTH)))){
@@ -350,13 +374,17 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 let sy:number = y * Main.config.GUID_HEIGHT + Main.config.GUID_CUT_HEIGHT + (Main.config.GUID_HEIGHT - Main.config.GUID_CUT_HEIGHT * 2);
 
-                pointArr[6].push([sx, sy]);
+                let arr:number[] = MapArea.getPointArr(sx, sy);
+
+                pointArr[6].push(arr);
 
                 let tx:number = sx + (Main.config.GUID_WIDTH - (Main.config.GUID_CUT_WIDTH + Main.config.GUID_CURVE_WIDTH) * 2);
 
                 let ty:number = sy;
 
-                pointArr[7].push([tx, ty]);
+                arr = MapArea.getPointArr(tx, ty);
+
+                pointArr[7].push(arr);
             }
         }
 
@@ -415,7 +443,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
             for(let i:number = 0 ; i < 8 ; i++){
 
-                let arr:number[][] = this.pointArr[i];
+                let arr:number[][] = pointArr[i];
 
                 if(arr.length > 0){
 
@@ -1006,6 +1034,8 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 _arr.splice(i, 1);
 
+                MapArea.pointArrPool.push(arr);
+
                 return true;
             }
         }
@@ -1313,5 +1343,25 @@ class MapArea extends egret.DisplayObjectContainer{
 
             return Main.config.LEVEL_ARR.length + _score / Main.config.LEVEL_ARR[Main.config.LEVEL_ARR.length - 1] - 1;
         }
+    }
+
+    private static getPointArr(_x:number, _y:number):number[]{
+
+        let arr:number[];
+
+        if(this.pointArrPool.length > 0){
+
+            arr = this.pointArrPool.pop();
+
+            arr[0] = _x;
+
+            arr[1] = _y;
+        }
+        else{
+
+            arr = [_x, _y];
+        }
+
+        return arr;
     }
 }

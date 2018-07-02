@@ -4,8 +4,6 @@ class Main extends egret.DisplayObjectContainer {
 
     private static tmpArr:number[] = [];
 
-    private static tmpArr2:MapUnit[][] = [];
-
     private static tmpArr3:MapArea[] = [];
 
     private static tmpDic:{[key:number]:MapUnit[]} = {};
@@ -15,6 +13,8 @@ class Main extends egret.DisplayObjectContainer {
     private static tmpDic3:{[key:number]:number} = {};
 
     private static tmpDic4:{[key:number]:number} = {};
+
+    private static mapUnitArrPool:MapUnit[][] = [];
 
     private unitArr:MapUnit[] = [];
 
@@ -489,9 +489,20 @@ class Main extends egret.DisplayObjectContainer {
 
             delete this.areaDic[key];
 
+            let tmpArr:MapUnit[] = Main.getMapUnitArr();
+
+            for(let i:number = 0, m:number = area.unitArr.length ; i < m ; i++){
+
+                tmpArr.push(area.unitArr[i]);
+            }
+
             area.release();
 
-            area.setData(area.unitArr, newKey, false);
+            area.setData(tmpArr, newKey, false);
+
+            tmpArr.length = 0;
+
+            Main.mapUnitArrPool.push(tmpArr);
 
             Main.tmpArr3.push(area);
 
@@ -505,11 +516,6 @@ class Main extends egret.DisplayObjectContainer {
         for(let i:number = 0, m:number = Main.tmpArr3.length ; i < m ; i++){
 
             let area:MapArea = Main.tmpArr3[i];
-
-            if(this.areaDic[area.id]){
-
-                console.log("error!!!!!!!!!!!!!!!!");
-            }
 
             this.areaDic[area.id] = area;
         }
@@ -526,7 +532,9 @@ class Main extends egret.DisplayObjectContainer {
 
             if(unit && !unit.area){
 
-                let arr:MapUnit[] = [unit];
+                let arr:MapUnit[] = Main.getMapUnitArr();
+
+                arr.push(unit);
 
                 let area:MapArea = this.getMapArea();
 
@@ -534,12 +542,11 @@ class Main extends egret.DisplayObjectContainer {
 
                 area.setData(arr, id, false);
 
+                arr.length = 0;
+
+                Main.mapUnitArrPool.push(arr);
+
                 this.mapContainer.addChild(area);
-
-                if(this.areaDic[id]){
-
-                    console.log("error!!!!!!!!!!!!!!!!");
-                }
 
                 this.areaDic[id] = area;
 
@@ -801,13 +808,17 @@ class Main extends egret.DisplayObjectContainer {
 
                 if(unit){
 
-                    let tmpArr:MapUnit[] = [unit];
+                    let tmpArr:MapUnit[] = Main.getMapUnitArr();
 
-                    Main.tmpArr2.push(tmpArr);
+                    tmpArr.push(unit);
 
                     Main.tmpDic2[i] = true;
 
                     this.checkNeighbour(tmpArr, Main.tmpDic2, unit);
+
+                    let id:number = Main.arrToNumber(tmpArr);
+
+                    Main.tmpDic[id] = tmpArr;
                 }
             }
         }
@@ -816,17 +827,6 @@ class Main extends egret.DisplayObjectContainer {
 
             delete Main.tmpDic2[key];
         }
-
-        for(let i:number = 0 , m:number = Main.tmpArr2.length ; i < m ; i++){
-
-            let tmpArr:MapUnit[] = Main.tmpArr2[i];
-
-            let id:number = Main.arrToNumber(tmpArr);
-
-            Main.tmpDic[id] = tmpArr;
-        }
-
-        Main.tmpArr2.length = 0;
 
         for(let key in this.areaDic){
 
@@ -843,6 +843,12 @@ class Main extends egret.DisplayObjectContainer {
                 delete this.areaDic[key];
             }
             else{
+
+                let tmpArr:MapUnit[] = Main.tmpDic[key];
+
+                tmpArr.length = 0;
+
+                Main.mapUnitArrPool.push(tmpArr);
 
                 delete Main.tmpDic[key];
             }
@@ -864,6 +870,10 @@ class Main extends egret.DisplayObjectContainer {
             this.areaDic[key] = area;
 
             this.mapContainer.addChild(area);
+
+            tmpArr.length = 0;
+
+            Main.mapUnitArrPool.push(tmpArr);
 
             delete Main.tmpDic[key];
         }
@@ -985,6 +995,20 @@ class Main extends egret.DisplayObjectContainer {
             area.init();
 
             return area;
+        }
+    }
+
+    private static getMapUnitArr():MapUnit[]{
+
+        if(this.mapUnitArrPool.length > 0){
+
+            return this.mapUnitArrPool.pop();
+        }
+        else{
+
+            let unitArr:MapUnit[] = [];
+
+            return unitArr;
         }
     }
 
