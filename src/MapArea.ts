@@ -1077,6 +1077,8 @@ class MapArea extends egret.DisplayObjectContainer{
 
     public async fade2(_unit:MapUnit){
 
+        this.cacheAsBitmap = false;
+
         let self:MapArea = this;
 
         self.stopFlash();
@@ -1203,6 +1205,8 @@ class MapArea extends egret.DisplayObjectContainer{
 
             throw new Error("MapArea.tmpArr2.length > 0");
         }
+
+        this.cacheAsBitmap = true;
     }
 
     private findPath(_pos:number, _path:{[key:number]:number}):number{

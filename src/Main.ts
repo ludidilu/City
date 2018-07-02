@@ -331,6 +331,8 @@ class Main extends egret.DisplayObjectContainer {
 
         this.mainPanel = new MainPanel();
 
+        this.mainPanel.cacheAsBitmap = true;
+
         this.uiContainer.addChild(this.mainPanel);
 
         this.alertPanel = new AlertPanel();
