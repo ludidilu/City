@@ -12,8 +12,6 @@ class Main extends egret.DisplayObjectContainer {
 
     private static tmpDic3:{[key:number]:number} = {};
 
-    private static tmpDic4:{[key:number]:number} = {};
-
     private static mapUnitArrPool:MapUnit[][] = [];
 
     private unitArr:MapUnit[] = [];
@@ -444,91 +442,72 @@ class Main extends egret.DisplayObjectContainer {
 
     private async unitFallAsync(){
 
+        let self:Main = this;
+
         for(let i:number = Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT - 1 ; i > -1  ; i--){
 
-            let unit:MapUnit = this.unitArr[i];
+            let unit:MapUnit = self.unitArr[i];
 
             if(unit){
 
-                let addValue:boolean = false;
+                let num:number = 0;
 
-                while(unit.pos < Main.config.MAP_WIDTH * (Main.config.MAP_HEIGHT - 1)){
+                while(unit.pos < Main.config.MAP_WIDTH * (Main.config.MAP_HEIGHT - 1) && !self.unitArr[unit.pos + Main.config.MAP_WIDTH]){
 
-                    if(!this.unitArr[unit.pos + Main.config.MAP_WIDTH]){
+                    for(let i:number = 0, m:number = unit.area.unitArr.length ; i < m ; i++){
 
-                        this.unitArr[unit.pos] = null;
+                        let tmpUnit:MapUnit = unit.area.unitArr[i];
 
-                        unit.pos += Main.config.MAP_WIDTH;
+                        if(self.unitArr[tmpUnit.pos] == tmpUnit){
 
-                        this.unitArr[unit.pos] = unit;
-
-                        if(!Main.tmpDic3[unit.area.id]){
-
-                            addValue = true;
-
-                            Main.tmpDic3[unit.area.id] = -Main.config.GUID_HEIGHT;
+                            self.unitArr[tmpUnit.pos] = null;
                         }
-                        else if(addValue){
 
-                            Main.tmpDic3[unit.area.id] -= Main.config.GUID_HEIGHT;
-                        }
-                    }
-                    else{
+                        tmpUnit.pos += Main.config.MAP_WIDTH;
 
-                        break;
+                        self.unitArr[tmpUnit.pos] = tmpUnit;
                     }
+
+                    num--;
+                }
+
+                if(num < 0){
+
+                    let area:MapArea = unit.area;
+
+                    let newKey:number = Main.arrToNumber(area.unitArr);
+
+                    delete self.areaDic[area.id];
+
+                    self.areaDic[newKey] = area;
+
+                    area.y = Main.tmpDic3[newKey] = num * Main.config.GUID_HEIGHT;
+
+                    let tmpArr:MapUnit[] = Main.getMapUnitArr();
+
+                    for(let i:number = 0, m:number = area.unitArr.length ; i < m ; i++){
+
+                        tmpArr.push(area.unitArr[i]);
+                    }
+
+                    area.release();
+
+                    area.setData(tmpArr, newKey, false);
+
+                    tmpArr.length = 0;
+
+                    Main.mapUnitArrPool.push(tmpArr);
                 }
             }
         }
 
-        for(let key in Main.tmpDic3){
-
-            let area:MapArea = this.areaDic[key];
-
-            let newKey:number = Main.arrToNumber(area.unitArr);
-
-            delete this.areaDic[key];
-
-            let tmpArr:MapUnit[] = Main.getMapUnitArr();
-
-            for(let i:number = 0, m:number = area.unitArr.length ; i < m ; i++){
-
-                tmpArr.push(area.unitArr[i]);
-            }
-
-            area.release();
-
-            area.setData(tmpArr, newKey, false);
-
-            tmpArr.length = 0;
-
-            Main.mapUnitArrPool.push(tmpArr);
-
-            Main.tmpArr3.push(area);
-
-            Main.tmpDic4[newKey] = Main.tmpDic3[key];
-
-            area.y = Main.tmpDic3[key];
-
-            delete Main.tmpDic3[key];
-        }
-
-        for(let i:number = 0, m:number = Main.tmpArr3.length ; i < m ; i++){
-
-            let area:MapArea = Main.tmpArr3[i];
-
-            this.areaDic[area.id] = area;
-        }
-
-        Main.tmpArr3.length = 0;
-
-        this.refill(true, this.sameColorProbability);
+        self.refill(true, self.sameColorProbability);
 
         let minNum:number = 0;
 
         for(let i:number = 0 ; i < Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT; i++){
 
-            let unit:MapUnit = this.unitArr[i];
+            let unit:MapUnit = self.unitArr[i];
 
             if(unit && !unit.area){
 
@@ -536,7 +515,7 @@ class Main extends egret.DisplayObjectContainer {
 
                 arr.push(unit);
 
-                let area:MapArea = this.getMapArea();
+                let area:MapArea = self.getMapArea();
 
                 let id:number = Main.arrToNumber(arr);
 
@@ -546,9 +525,9 @@ class Main extends egret.DisplayObjectContainer {
 
                 Main.mapUnitArrPool.push(arr);
 
-                this.mapContainer.addChild(area);
+                self.mapContainer.addChild(area);
 
-                this.areaDic[id] = area;
+                self.areaDic[id] = area;
 
                 let pos:number = unit.pos + Main.config.MAP_WIDTH;
 
@@ -556,7 +535,7 @@ class Main extends egret.DisplayObjectContainer {
 
                 while(pos < Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT){
 
-                    let tmpUnit:MapUnit = this.unitArr[pos];
+                    let tmpUnit:MapUnit = self.unitArr[pos];
 
                     if(!tmpUnit.area){
 
@@ -566,7 +545,7 @@ class Main extends egret.DisplayObjectContainer {
                     pos += Main.config.MAP_WIDTH;
                 }
 
-                Main.tmpDic4[id] = num;
+                Main.tmpDic3[id] = num;
 
                 area.y = num;
 
@@ -579,22 +558,22 @@ class Main extends egret.DisplayObjectContainer {
 
         let fun:(_v:number)=>void = function(_v:number):void{
 
-            for(let key in Main.tmpDic4){
+            for(let key in Main.tmpDic3){
 
-                let area:MapArea = this.areaDic[key];
+                let area:MapArea = self.areaDic[key];
 
-                area.y = Main.tmpDic4[key] - _v * minNum;
+                area.y = Main.tmpDic3[key] - _v * minNum;
 
                 if(area.y >= 0){
 
                     area.y = 0;
 
-                    delete Main.tmpDic4[key];
+                    delete Main.tmpDic3[key];
                 }
             }
         };
 
-        await SuperTween.getInstance().to(0,1,1000,fun.bind(this));
+        await SuperTween.getInstance().to(0, 1, -minNum * 300 / Main.config.GUID_HEIGHT, fun);
     }
 
     private resetAreaPos():void{
