@@ -1,5 +1,11 @@
 class Config{
 
+    public BG_COLOR:number = 0x888888;
+
+    public LINE_COLOR:number = 0x000000;
+
+    public LINE_WIDTH:number = 5;
+
     public GUID_WIDTH:number = 120;
 
     public GUID_HEIGHT:number = 120;

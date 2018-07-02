@@ -29,7 +29,7 @@ class MapGridUnit extends egret.DisplayObjectContainer{
 
             sp.graphics.beginFill(Main.config.MAP_COLOR[i]);
 
-            sp.graphics.lineStyle(MapArea.LINE_WIDTH);
+            sp.graphics.lineStyle(Main.config.LINE_WIDTH, Main.config.LINE_COLOR);
 
             sp.graphics.moveTo(Main.config.GUID_CUT_WIDTH, Main.config.GUID_CUT_HEIGHT + Main.config.GUID_CURVE_HEIGHT);
 

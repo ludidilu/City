@@ -1,4 +1,10 @@
 {
+    "BG_COLOR": "0x888888",
+
+    "LINE_COLOR": "0x000000",
+
+    "LINE_WIDTH": 5,
+
     "GUID_WIDTH": 120,
 
     "GUID_HEIGHT": 120,

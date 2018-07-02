@@ -82,24 +82,24 @@ class Main extends egret.DisplayObjectContainer {
 
     private clickTest(e:egret.TouchEvent):void{
 
-        let kk:{[key:number]:number} = {};
+        let arr:{data:{pos:number, color:number}[]} = RES.getRes("bbb_json");
 
-        kk[5] = 0;
+        this.reset();
 
-        if(kk[5] === undefined){
+        for(let data of arr.data){
 
-            console.log("aa");
+            let unit:MapUnit = this.getMapUnit();
+
+            unit.pos = data.pos;
+
+            unit.color = data.color;
+
+            unit.score = 1;
+
+            this.unitArr[unit.pos] = unit;
         }
 
-        if(kk[4] === undefined){
-
-            console.log("bb");
-        }
-
-        if(kk[5] == undefined){
-
-            console.log("cc");
-        }
+        this.refreshMap();
     }
 
     private clickTest1(e:egret.TouchEvent):void{
@@ -139,7 +139,7 @@ class Main extends egret.DisplayObjectContainer {
 
         let sp:egret.Shape = new egret.Shape();
 
-        sp.graphics.beginFill(0x888888);
+        sp.graphics.beginFill(Main.config.BG_COLOR);
 
         sp.graphics.drawRect(0, 0, this.stage.stageWidth, this.stage.stageHeight);
 
@@ -189,7 +189,7 @@ class Main extends egret.DisplayObjectContainer {
 
             sp.touchEnabled = true;
 
-            sp.graphics.beginFill(0xff0000, 0);
+            sp.graphics.beginFill(0, 0);
 
             sp.graphics.drawRect(x * Main.config.GUID_WIDTH, y * Main.config.GUID_HEIGHT, Main.config.GUID_WIDTH, Main.config.GUID_HEIGHT);
 
@@ -506,6 +506,8 @@ class Main extends egret.DisplayObjectContainer {
 
         this.refill(true, this.sameColorProbability);
 
+        let minNum:number = 0;
+
         for(let i:number = 0 ; i < Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT; i++){
 
             let unit:MapUnit = this.unitArr[i];
@@ -548,6 +550,11 @@ class Main extends egret.DisplayObjectContainer {
                 dic[id] = num;
 
                 area.y = num;
+
+                if(num < minNum){
+
+                    minNum = num;
+                }
             }
         }
 
@@ -557,11 +564,18 @@ class Main extends egret.DisplayObjectContainer {
 
                 let area:MapArea = this.areaDic[key];
 
-                area.y = _v * dic[key];
+                area.y = dic[key] - _v * minNum;
+
+                if(area.y >= 0){
+
+                    area.y = 0;
+
+                    delete dic[key];
+                }
             }
         };
 
-        await SuperTween.getInstance().to(1,0,1000,fun.bind(this));
+        await SuperTween.getInstance().to(0,1,1000,fun.bind(this));
     }
 
     private resetAreaPos():void{

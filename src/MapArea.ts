@@ -29,7 +29,7 @@ class GraphicsList{
 
 class MapArea extends egret.DisplayObjectContainer{
 
-    public static readonly LINE_WIDTH:number = 5;
+    private static readonly USE_RTT:boolean = false;
 
     private static gridPool:MapGridUnit[] = [];
 
@@ -43,11 +43,17 @@ class MapArea extends egret.DisplayObjectContainer{
 
     private spContainer:egret.DisplayObjectContainer;
 
+    private rtContainer:egret.DisplayObjectContainer;
+
     private gridContainer:egret.DisplayObjectContainer;
 
     private sp:egret.Shape;
 
     private flashSp:egret.Shape;
+
+    private rt:egret.RenderTexture;
+
+    private bp:egret.Bitmap;
 
     private pointArr:number[][][] = [];
 
@@ -62,6 +68,17 @@ class MapArea extends egret.DisplayObjectContainer{
         this.spContainer = new egret.DisplayObjectContainer();
         
         this.addChild(this.spContainer);
+
+        if(MapArea.USE_RTT){
+
+            this.rtContainer = new egret.DisplayObjectContainer();
+
+            this.addChild(this.rtContainer);
+
+            this.rt = new egret.RenderTexture();
+
+            this.rtContainer.visible = false;
+        }
 
         this.gridContainer = new egret.DisplayObjectContainer();
 
@@ -98,11 +115,32 @@ class MapArea extends egret.DisplayObjectContainer{
 
         this.gridDic = {};
 
-        this.releaseMask();
+        if(MapArea.USE_RTT){
+
+            this.releaseRt();
+        }
+        else{
+
+            this.releaseMask();
+        }
 
         this.releaseGraphics();
 
         this.stopFlash();
+    }
+
+    private releaseRt():void{
+
+        if(this.bp){
+
+            this.rtContainer.removeChild(this.bp);
+
+            this.bp = null;
+
+            this.spContainer.visible = true;
+
+            this.rtContainer.visible = false;
+        }
     }
 
     private releaseMask():void{
@@ -172,7 +210,7 @@ class MapArea extends egret.DisplayObjectContainer{
             sp = new egret.Shape();
         }
 
-        sp.graphics.lineStyle(MapArea.LINE_WIDTH);
+        sp.graphics.lineStyle(Main.config.LINE_WIDTH, Main.config.LINE_COLOR);
 
         _container.addChild(sp);
 
@@ -317,7 +355,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
         command.beginFill(Main.config.MAP_COLOR[this.unitArr[0].color % Main.config.MAP_COLOR.length]);
 
-        command.lineStyle(MapArea.LINE_WIDTH);
+        command.lineStyle(Main.config.LINE_WIDTH, Main.config.LINE_COLOR);
 
         MapArea.graphicsList.list.push(command);
 
@@ -368,33 +406,50 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 if(arr.length > 0){
 
-                    drawMask = true;
+                    if(!needSort){
 
-                    needSort = true;
+                        needSort = true;
+                    }
+
+                    if(!drawMask){
+
+                        drawMask = true;
+                    }
 
                     sx = arr[0][0];
 
                     sy = arr[0][1]; 
 
-                    let sp:egret.Shape = MapArea.getMaskSp(this.spContainer);
+                    if(MapArea.USE_RTT){
 
-                    this.maskArr.push(sp);
+                        let sp:egret.Shape = MapArea.getMaskSp(this.spContainer);
 
-                    sp.blendMode = egret.BlendMode.ERASE;
+                        this.maskArr.push(sp);
 
-                    sp.graphics.beginFill(0);
+                        sp.blendMode = egret.BlendMode.ERASE;
 
-                    let sp2:egret.Shape = MapArea.getMaskSp(this.spContainer);
+                        sp.graphics.beginFill(0);
 
-                    this.maskArr.push(sp2);
+                        MapArea.graphicsList.list.push(sp.graphics);
 
-                    sp2.blendMode = egret.BlendMode.NORMAL;
+                        let sp2:egret.Shape = MapArea.getMaskSp(this.spContainer);
 
-                    sp2.graphics.beginFill(0, 0);
+                        this.maskArr.push(sp2);
 
-                    MapArea.graphicsList.list.push(sp.graphics);
+                        sp2.blendMode = egret.BlendMode.NORMAL;
 
-                    MapArea.graphicsList.list.push(sp2.graphics);
+                        MapArea.graphicsList.list.push(sp2.graphics);
+                    }
+                    else{
+
+                        let sp2:egret.Shape = MapArea.getMaskSp(this.spContainer);
+
+                        this.maskArr.push(sp2);
+
+                        sp2.graphics.beginFill(Main.config.BG_COLOR);
+
+                        MapArea.graphicsList.list.push(sp2.graphics);
+                    }
 
                     this.drawLine(sx, sy, 0, sx, sy, MapArea.graphicsList, pointArr, true);
 
@@ -406,6 +461,21 @@ class MapArea extends egret.DisplayObjectContainer{
 
                 break;
             }
+        }
+
+        if(needSort && MapArea.USE_RTT){
+
+            this.rt.drawToTexture(this.spContainer);
+
+            this.releaseMask();
+
+            this.bp = new egret.Bitmap(this.rt);
+
+            this.rtContainer.addChild(this.bp);
+
+            this.spContainer.visible = false;
+
+            this.rtContainer.visible = true;
         }
 
         return needSort;
@@ -932,6 +1002,11 @@ class MapArea extends egret.DisplayObjectContainer{
 
     public async fade(_unit:MapUnit){
 
+        if(MapArea.USE_RTT){
+
+            this.releaseRt();
+        }
+
         this.stopFlash();
 
         let x:number = _unit.pos % Main.config.MAP_WIDTH;
@@ -962,17 +1037,24 @@ class MapArea extends egret.DisplayObjectContainer{
 
     public async fade2(_unit:MapUnit){
 
-        this.stopFlash();
-
         let self:MapArea = this;
+
+        self.stopFlash();
+
+        self.releaseGraphics();
+
+        if(MapArea.USE_RTT){
+
+            self.releaseRt();
+        }
+        else{
+
+            self.releaseMask();
+        }
 
         let path:{[key:number]:number} = {};
 
         let length:number = self.findPath(_unit.pos, path);
-
-        self.releaseMask();
-
-        self.releaseGraphics();
 
         let arr:MapGridUnit[] = [];
 
@@ -1064,7 +1146,7 @@ class MapArea extends egret.DisplayObjectContainer{
             }
         };
 
-        await SuperTween.getInstance().to(0, length, length * 300, cb.bind(this));
+        await SuperTween.getInstance().to(0, length, length * 200, cb.bind(this));
     }
 
     private findPath(_pos:number, _path:{[key:number]:number}):number{
