@@ -75,6 +75,8 @@ class MapArea extends egret.DisplayObjectContainer{
 
     public init():void{
 
+        this.cacheAsBitmap = true;
+
         this.spContainer = new egret.DisplayObjectContainer();
         
         this.addChild(this.spContainer);
@@ -274,11 +276,6 @@ class MapArea extends egret.DisplayObjectContainer{
     }
 
     public setData(_unitArr:MapUnit[], _id, _isStatic:boolean):boolean{
-
-        if(_unitArr.length == 0){
-
-            console.log("fff");
-        }
 
         for(let i:number = 0, m:number = _unitArr.length ; i < m ; i++){
 
@@ -1097,15 +1094,25 @@ class MapArea extends egret.DisplayObjectContainer{
 
         let length:number = self.findPath(_unit.pos, MapArea.tmpDic2);
 
+        let color:number;
+
+        for(let i:number = 0, m:number = self.unitArr.length ; i < m ; i++){
+
+            let tmpUnit:MapUnit = self.unitArr[i];
+
+            if(tmpUnit != _unit){
+
+                color = tmpUnit.color % Main.config.MAP_COLOR.length;
+
+                break;
+            }
+        }
+
         let baseGrid:MapGridUnit;
 
         for(let key in self.gridDic){
 
             let guid:MapGridUnit = self.gridDic[key];
-
-            let color:number = self.unitArr[0].color;
-
-            color = color % Main.config.MAP_COLOR.length;
 
             guid.showSp(color);
 
