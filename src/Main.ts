@@ -2,6 +2,20 @@ class Main extends egret.DisplayObjectContainer {
 
     public static config:Config;
 
+    private static tmpArr:number[] = [];
+
+    private static tmpArr2:MapUnit[][] = [];
+
+    private static tmpArr3:MapArea[] = [];
+
+    private static tmpDic:{[key:number]:MapUnit[]} = {};
+
+    private static tmpDic2:{[key:number]:boolean} = {};
+
+    private static tmpDic3:{[key:number]:number} = {};
+
+    private static tmpDic4:{[key:number]:number} = {};
+
     private unitArr:MapUnit[] = [];
 
     private unitPool:MapUnit[] = [];
@@ -430,8 +444,6 @@ class Main extends egret.DisplayObjectContainer {
 
     private async unitFallAsync(){
 
-        let oldDic:{[key:number]:number} = {};
-
         for(let i:number = Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT - 1 ; i > -1  ; i--){
 
             let unit:MapUnit = this.unitArr[i];
@@ -450,15 +462,15 @@ class Main extends egret.DisplayObjectContainer {
 
                         this.unitArr[unit.pos] = unit;
 
-                        if(!oldDic[unit.area.id]){
+                        if(!Main.tmpDic3[unit.area.id]){
 
                             addValue = true;
 
-                            oldDic[unit.area.id] = -Main.config.GUID_HEIGHT;
+                            Main.tmpDic3[unit.area.id] = -Main.config.GUID_HEIGHT;
                         }
                         else if(addValue){
 
-                            oldDic[unit.area.id] -= Main.config.GUID_HEIGHT;
+                            Main.tmpDic3[unit.area.id] -= Main.config.GUID_HEIGHT;
                         }
                     }
                     else{
@@ -469,11 +481,7 @@ class Main extends egret.DisplayObjectContainer {
             }
         }
 
-        let dic:{[key:number]:number} = {};
-
-        let tmpArr:MapArea[] = []
-
-        for(let key in oldDic){
+        for(let key in Main.tmpDic3){
 
             let area:MapArea = this.areaDic[key];
 
@@ -485,16 +493,18 @@ class Main extends egret.DisplayObjectContainer {
 
             area.setData(area.unitArr, newKey, false);
 
-            tmpArr.push(area);
+            Main.tmpArr3.push(area);
 
-            dic[newKey] = oldDic[key];
+            Main.tmpDic4[newKey] = Main.tmpDic3[key];
 
-            area.y = oldDic[key];
+            area.y = Main.tmpDic3[key];
+
+            delete Main.tmpDic3[key];
         }
 
-        for(let i:number = 0, m:number = tmpArr.length ; i < m ; i++){
+        for(let i:number = 0, m:number = Main.tmpArr3.length ; i < m ; i++){
 
-            let area:MapArea = tmpArr[i];
+            let area:MapArea = Main.tmpArr3[i];
 
             if(this.areaDic[area.id]){
 
@@ -503,6 +513,8 @@ class Main extends egret.DisplayObjectContainer {
 
             this.areaDic[area.id] = area;
         }
+
+        Main.tmpArr3.length = 0;
 
         this.refill(true, this.sameColorProbability);
 
@@ -547,7 +559,7 @@ class Main extends egret.DisplayObjectContainer {
                     pos += Main.config.MAP_WIDTH;
                 }
 
-                dic[id] = num;
+                Main.tmpDic4[id] = num;
 
                 area.y = num;
 
@@ -560,17 +572,17 @@ class Main extends egret.DisplayObjectContainer {
 
         let fun:(_v:number)=>void = function(_v:number):void{
 
-            for(let key in dic){
+            for(let key in Main.tmpDic4){
 
                 let area:MapArea = this.areaDic[key];
 
-                area.y = dic[key] - _v * minNum;
+                area.y = Main.tmpDic4[key] - _v * minNum;
 
                 if(area.y >= 0){
 
                     area.y = 0;
 
-                    delete dic[key];
+                    delete Main.tmpDic4[key];
                 }
             }
         };
@@ -644,8 +656,6 @@ class Main extends egret.DisplayObjectContainer {
 
                 if(Math.random() < _sameProbability){
 
-                    let arr:number[] = [];
-
                     let x:number = i % Main.config.MAP_WIDTH;
 
                     let y:number = Math.floor(i / Main.config.MAP_WIDTH);
@@ -662,7 +672,7 @@ class Main extends egret.DisplayObjectContainer {
 
                             if(tmpColor < Main.config.MAP_COLOR.length - 2){
 
-                                arr.push(tmpColor);
+                                Main.tmpArr.push(tmpColor);
                             }
                         }
                     }
@@ -679,7 +689,7 @@ class Main extends egret.DisplayObjectContainer {
 
                             if(tmpColor < Main.config.MAP_COLOR.length - 2){
 
-                                arr.push(tmpColor);
+                                Main.tmpArr.push(tmpColor);
                             }
                         }
                     }
@@ -696,7 +706,7 @@ class Main extends egret.DisplayObjectContainer {
 
                             if(tmpColor < Main.config.MAP_COLOR.length - 2){
 
-                                arr.push(tmpColor);
+                                Main.tmpArr.push(tmpColor);
                             }
                         }
                     }
@@ -713,16 +723,18 @@ class Main extends egret.DisplayObjectContainer {
 
                             if(tmpColor < Main.config.MAP_COLOR.length - 2){
 
-                                arr.push(tmpColor);
+                                Main.tmpArr.push(tmpColor);
                             }
                         }
                     }
 
-                    if(arr.length > 0){
+                    if(Main.tmpArr.length > 0){
 
-                        let index:number = Math.floor(Math.random() * arr.length);
+                        let index:number = Math.floor(Math.random() * Main.tmpArr.length);
 
-                        color = arr[index];
+                        color = Main.tmpArr[index];
+
+                        Main.tmpArr.length = 0;
                     }
                     else{
 
@@ -781,13 +793,9 @@ class Main extends egret.DisplayObjectContainer {
 
     private refreshMap():void{
 
-        let dic:{[key:number]:boolean} = {};
-
-        let arr:MapUnit[][] = [];
-
         for(let i:number = 0, m:number = Main.config.MAP_WIDTH * Main.config.MAP_HEIGHT ; i < m; i++){
 
-            if(!dic[i]){
+            if(!Main.tmpDic2[i]){
 
                 let unit:MapUnit = this.unitArr[i];
 
@@ -795,29 +803,34 @@ class Main extends egret.DisplayObjectContainer {
 
                     let tmpArr:MapUnit[] = [unit];
 
-                    arr.push(tmpArr);
+                    Main.tmpArr2.push(tmpArr);
 
-                    dic[i] = true;
+                    Main.tmpDic2[i] = true;
 
-                    this.checkNeighbour(tmpArr, dic, unit);
+                    this.checkNeighbour(tmpArr, Main.tmpDic2, unit);
                 }
             }
         }
 
-        let areaDic:{[key:number]:MapUnit[]} = {};
+        for(let key in Main.tmpDic2){
 
-        for(let i:number = 0 , m:number = arr.length ; i < m ; i++){
+            delete Main.tmpDic2[key];
+        }
 
-            let tmpArr:MapUnit[] = arr[i];
+        for(let i:number = 0 , m:number = Main.tmpArr2.length ; i < m ; i++){
+
+            let tmpArr:MapUnit[] = Main.tmpArr2[i];
 
             let id:number = Main.arrToNumber(tmpArr);
 
-            areaDic[id] = tmpArr;
+            Main.tmpDic[id] = tmpArr;
         }
+
+        Main.tmpArr2.length = 0;
 
         for(let key in this.areaDic){
 
-            if(!areaDic[key]){
+            if(!Main.tmpDic[key]){
 
                 let area:MapArea = this.areaDic[key];
 
@@ -831,15 +844,15 @@ class Main extends egret.DisplayObjectContainer {
             }
             else{
 
-                delete areaDic[key];
+                delete Main.tmpDic[key];
             }
         }
 
         let needSort:boolean = false;
 
-        for(let key in areaDic){
+        for(let key in Main.tmpDic){
 
-            let tmpArr:MapUnit[] = areaDic[key];
+            let tmpArr:MapUnit[] = Main.tmpDic[key];
 
             let area:MapArea = this.getMapArea();
 
@@ -851,6 +864,8 @@ class Main extends egret.DisplayObjectContainer {
             this.areaDic[key] = area;
 
             this.mapContainer.addChild(area);
+
+            delete Main.tmpDic[key];
         }
 
         if(needSort){
@@ -861,21 +876,21 @@ class Main extends egret.DisplayObjectContainer {
 
     private sortArea():void{
 
-        let arr:MapArea[] = [];
-
         for(let key in this.areaDic){
 
-            arr.push(this.areaDic[key]);
+            Main.tmpArr3.push(this.areaDic[key]);
         }
 
-        arr = arr.sort(this.compareArea);
+        Main.tmpArr3.sort(this.compareArea);
 
-        for(let i:number = 0, m:number = arr.length ; i < m ; i++){
+        for(let i:number = 0, m:number = Main.tmpArr3.length ; i < m ; i++){
 
-            let area:MapArea = arr[i];
+            let area:MapArea = Main.tmpArr3[i];
 
             this.mapContainer.setChildIndex(area, 0);
         }
+
+        Main.tmpArr3.length = 0;
     }
 
     private compareArea(_a:MapArea, _b:MapArea):number{
@@ -1010,9 +1025,9 @@ class Main extends egret.DisplayObjectContainer {
             this.mapContainer.removeChild(area);
 
             this.areaPool.push(area);
-        }
 
-        this.areaDic = {};
+            delete this.areaDic[key];
+        }
     }
 
     private isOver():boolean{

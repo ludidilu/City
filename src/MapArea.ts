@@ -31,13 +31,21 @@ class MapArea extends egret.DisplayObjectContainer{
 
     private static readonly USE_RTT:boolean = false;
 
+    private static tmpDic:{[key:number]:number} = {};
+
+    private static tmpDic2:{[key:number]:number} = {};
+
+    private static tmpArr:number[][] = [];
+
+    private static tmpArr2:MapGridUnit[] = [];
+
     private static gridPool:MapGridUnit[] = [];
 
     private static maskSpPool:egret.Shape[] = [];
 
     private static graphicsList:GraphicsList = new GraphicsList();
 
-    public unitArr:MapUnit[];
+    public unitArr:MapUnit[] = [];
 
     public id:number;
 
@@ -111,9 +119,9 @@ class MapArea extends egret.DisplayObjectContainer{
             this.gridContainer.removeChild(grid);
 
             MapArea.gridPool.push(grid);
-        }
 
-        this.gridDic = {};
+            delete this.gridDic[key];
+        }
 
         if(MapArea.USE_RTT){
 
@@ -127,6 +135,8 @@ class MapArea extends egret.DisplayObjectContainer{
         this.releaseGraphics();
 
         this.stopFlash();
+
+        this.unitArr.length = 0;
     }
 
     private releaseRt():void{
@@ -258,7 +268,10 @@ class MapArea extends egret.DisplayObjectContainer{
 
     public setData(_unitArr:MapUnit[], _id, _isStatic:boolean):boolean{
 
-        this.unitArr = _unitArr;
+        for(let i:number = 0, m:number = _unitArr.length ; i < m ; i++){
+
+            this.unitArr.push(_unitArr[i]);
+        }
 
         this.id = _id;
 
@@ -1052,11 +1065,7 @@ class MapArea extends egret.DisplayObjectContainer{
             self.releaseMask();
         }
 
-        let path:{[key:number]:number} = {};
-
-        let length:number = self.findPath(_unit.pos, path);
-
-        let arr:MapGridUnit[] = [];
+        let length:number = self.findPath(_unit.pos, MapArea.tmpDic2);
 
         let baseGrid:MapGridUnit;
 
@@ -1072,7 +1081,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
             if(guid.pos != _unit.pos){
 
-                arr.push(guid);
+                MapArea.tmpArr2.push(guid);
             }
             else{
 
@@ -1086,9 +1095,9 @@ class MapArea extends egret.DisplayObjectContainer{
 
         let cb:(_v:number)=>void = function(_v:number):void{
 
-            for(let i:number = arr.length - 1 ; i > -1 ; i--){
+            for(let i:number = MapArea.tmpArr2.length - 1 ; i > -1 ; i--){
 
-                let guid:MapGridUnit = arr[i];
+                let guid:MapGridUnit = MapArea.tmpArr2[i];
 
                 let v:number = _v;
 
@@ -1102,7 +1111,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                         guid.y = Math.floor(tmpPos / Main.config.MAP_WIDTH) * Main.config.GUID_HEIGHT;
 
-                        arr.splice(i, 1);
+                        MapArea.tmpArr2.splice(i, 1);
 
                         baseGrid.setScore(baseGrid.score + guid.score, canOverMaxLevel);
 
@@ -1115,7 +1124,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     let lastY:number = Math.floor(tmpPos / Main.config.MAP_WIDTH);
 
-                    tmpPos = path[tmpPos];
+                    tmpPos = MapArea.tmpDic2[tmpPos];
 
                     if(v <= 1){
 
@@ -1129,7 +1138,7 @@ class MapArea extends egret.DisplayObjectContainer{
 
                         if(guid.x == (_unit.pos % Main.config.MAP_WIDTH) * Main.config.GUID_WIDTH && guid.y == Math.floor(_unit.pos / Main.config.MAP_WIDTH) * Main.config.GUID_HEIGHT){
 
-                            arr.splice(i, 1);
+                            MapArea.tmpArr2.splice(i, 1);
 
                             baseGrid.setScore(baseGrid.score + guid.score, canOverMaxLevel);
 
@@ -1147,17 +1156,28 @@ class MapArea extends egret.DisplayObjectContainer{
         };
 
         await SuperTween.getInstance().to(0, length, length * 200, cb.bind(this));
+
+        for(let key in MapArea.tmpDic2){
+
+            delete MapArea.tmpDic2[key];
+        }
+
+        if(MapArea.tmpArr2.length > 0){
+
+            throw new Error("MapArea.tmpArr2.length > 0");
+        }
     }
 
     private findPath(_pos:number, _path:{[key:number]:number}):number{
 
-        let arr:number[][] = [];
+        if(!MapArea.tmpArr[0]){
 
-        arr[0] = [_pos];
+            MapArea.tmpArr[0] = [];
+        }
 
-        let dic:{[key:number]:number} = {};
+        MapArea.tmpArr[0].push(_pos);
 
-        dic[_pos] = 0;
+        MapArea.tmpDic[_pos] = 0;
 
         let dicLength:number = 1;
 
@@ -1165,13 +1185,16 @@ class MapArea extends egret.DisplayObjectContainer{
 
         while(dicLength < this.unitArr.length){
 
-            let arr2:number[] = arr[searchDis];
+            let arr2:number[] = MapArea.tmpArr[searchDis];
 
             searchDis++;
 
-            let arr3:number[] = [];
+            if(!MapArea.tmpArr[searchDis]){
 
-            arr[searchDis] = arr3;
+                MapArea.tmpArr[searchDis] = [];
+            }
+
+            let arr3:number[] = MapArea.tmpArr[searchDis];
 
             for(let i:number = 0, m:number = arr2.length ; i < m ; i++){
 
@@ -1187,9 +1210,9 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     if(this.id & (1 << pos)){
 
-                        if(dic[pos] === undefined){
+                        if(MapArea.tmpDic[pos] === undefined){
 
-                            dic[pos] = searchDis;
+                            MapArea.tmpDic[pos] = searchDis;
 
                             arr3.push(pos);
 
@@ -1206,9 +1229,9 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     if(this.id & (1 << pos)){
 
-                        if(dic[pos] === undefined){
+                        if(MapArea.tmpDic[pos] === undefined){
 
-                            dic[pos] = searchDis;
+                            MapArea.tmpDic[pos] = searchDis;
 
                             arr3.push(pos);
 
@@ -1225,9 +1248,9 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     if(this.id & (1 << pos)){
 
-                        if(dic[pos] === undefined){
+                        if(MapArea.tmpDic[pos] === undefined){
 
-                            dic[pos] = searchDis;
+                            MapArea.tmpDic[pos] = searchDis;
 
                             arr3.push(pos);
 
@@ -1244,9 +1267,9 @@ class MapArea extends egret.DisplayObjectContainer{
 
                     if(this.id & (1 << pos)){
 
-                        if(dic[pos] === undefined){
+                        if(MapArea.tmpDic[pos] === undefined){
 
-                            dic[pos] = searchDis;
+                            MapArea.tmpDic[pos] = searchDis;
 
                             arr3.push(pos);
 
@@ -1257,6 +1280,16 @@ class MapArea extends egret.DisplayObjectContainer{
                     }
                 }
             }
+        }
+
+        for(let key in MapArea.tmpDic){
+
+            delete MapArea.tmpDic[key];
+        }
+
+        for(let i:number = 0, m:number = MapArea.tmpArr.length ; i < m ; i++){
+
+            MapArea.tmpArr[i].length = 0;
         }
 
         return searchDis;
